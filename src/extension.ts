@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 import { Config } from './config';
 import { extensionDisplayName } from './constants';
 import { OutputChannelLogger } from './logger';
@@ -12,16 +12,6 @@ export function activate(context: vscode.ExtensionContext) {
 
    const config = Config.getInstance();
    disposables.push(config);
-
-   disposables.push(
-      vscode.commands.registerCommand('extension-name.helloWorld', () => {
-         if (config.useWarning) {
-            vscode.window.showWarningMessage('Hello World!');
-         } else {
-            vscode.window.showInformationMessage('Hello World!');
-         }
-      }),
-   );
 
    context.subscriptions.push(...disposables);
 }

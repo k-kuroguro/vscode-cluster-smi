@@ -1,5 +1,5 @@
-const extensionName = 'extension-name';
-const extensionDisplayName = 'Extension Name';
+const extensionName = 'cluster-smi';
+const extensionDisplayName = 'cluster-smi';
 const extensionPublisher = 'k-kuroguro';
 
 export { extensionDisplayName, extensionName, extensionPublisher };

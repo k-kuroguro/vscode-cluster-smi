@@ -1,6 +1,6 @@
 {
-   "name": "extension-name",
-   "displayName": "Extension Name",
+   "name": "cluster-smi",
+   "displayName": "cluster-smi",
    "description": "",
    "publisher": "k-kuroguro",
    "version": "0.0.1",
@@ -12,36 +12,24 @@
       "Other"
    ],
    "license": "MIT",
-   "homepage": "https://github.com/k-kuroguro/vscode-extension-template/blob/main/README.md",
+   "homepage": "https://github.com/k-kuroguro/vscode-cluster-smi/blob/main/README.md",
    "repository": {
       "type": "git",
-      "url": "https://github.com/k-kuroguro/vscode-extension-template.git"
+      "url": "https://github.com/k-kuroguro/vscode-cluster-smi.git"
    },
    "bugs": {
-      "url": "https://github.com/k-kuroguro/vscode-extension-template/issues"
+      "url": "https://github.com/k-kuroguro/vscode-cluster-smi/issues"
    },
    "activationEvents": [
       "*"
    ],
    "main": "./dist/extension.js",
    "contributes": {
-      "commands": [
-         {
-            "command": "extension-name.helloWorld",
-            "title": "Hello World",
-            "category": "Extension Name"
-         }
-      ],
+      "commands": [],
       "configuration": {
          "type": "object",
-         "title": "Extension Name",
-         "properties": {
-            "extension-name.useWarning": {
-               "type": "boolean",
-               "default": false,
-               "description": "Control whether to use warning on hello world command."
-            }
-         }
+         "title": "cluster-smi",
+         "properties": {}
       }
    },
    "scripts": {

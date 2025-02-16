@@ -13,7 +13,6 @@ export class Config {
       this.disposables.push(
          vscode.workspace.onDidChangeConfiguration((e) => {
             this.loadWorkspaceConfig();
-            if (e.affectsConfiguration(`${extensionName}.${Config.ConfigItem.UseWarning}`)) this._onDidChangeConfig.fire([Config.ConfigItem.UseWarning]);
          }),
       );
    }
@@ -31,21 +30,10 @@ export class Config {
          disposable.dispose();
       }
    }
-
-   get useWarning(): boolean {
-      return this.workspaceConfig.get(Config.ConfigItem.UseWarning) ?? false;
-   }
-
-   set useWarning(allow: boolean) {
-      this.workspaceConfig.update(Config.ConfigItem.UseWarning, allow, vscode.ConfigurationTarget.Global);
-      this._onDidChangeConfig.fire([Config.ConfigItem.UseWarning]);
-   }
 }
 
 export namespace Config {
-   export const ConfigItem = {
-      UseWarning: 'useWarning',
-   } as const;
+   export const ConfigItem = {} as const;
    export type ConfigItem = (typeof ConfigItem)[keyof typeof ConfigItem];
    export type ConfigItems = ConfigItem[];
 }
