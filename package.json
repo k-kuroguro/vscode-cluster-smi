@@ -29,7 +29,13 @@
       "configuration": {
          "type": "object",
          "title": "cluster-smi",
-         "properties": {}
+         "properties": {
+            "cluster-smi.execPath": {
+               "type": "string",
+               "default": "cluster-smi",
+               "description": "Path to the cluster-smi executable."
+            }
+         }
       }
    },
    "scripts": {

@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { extensionName } from './constants';
 
 export class Config {
-   private _onDidChangeConfig: vscode.EventEmitter<Config.ConfigItems | undefined> = new vscode.EventEmitter<Config.ConfigItems | undefined>();
-   readonly onDidChangeConfig: vscode.Event<Config.ConfigItems | undefined> = this._onDidChangeConfig.event;
+   private _onDidChangeConfig: vscode.EventEmitter<Config.ConfigItems> = new vscode.EventEmitter<Config.ConfigItems>();
+   readonly onDidChangeConfig: vscode.Event<Config.ConfigItems> = this._onDidChangeConfig.event;
 
    private static instance: Config = new Config();
    private workspaceConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(extensionName);
@@ -13,6 +13,7 @@ export class Config {
       this.disposables.push(
          vscode.workspace.onDidChangeConfiguration((e) => {
             this.loadWorkspaceConfig();
+            if (e.affectsConfiguration(`${extensionName}.${Config.ConfigItem.ExecPath}`)) this._onDidChangeConfig.fire([Config.ConfigItem.ExecPath]);
          }),
       );
    }
@@ -30,10 +31,21 @@ export class Config {
          disposable.dispose();
       }
    }
+
+   get execPath(): string {
+      return this.workspaceConfig.get(Config.ConfigItem.ExecPath) ?? 'cluster-smi';
+   }
+
+   set execPath(path: string) {
+      this.workspaceConfig.update(Config.ConfigItem.ExecPath, path, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.ExecPath]);
+   }
 }
 
 export namespace Config {
-   export const ConfigItem = {} as const;
+   export const ConfigItem = {
+      ExecPath: 'execPath',
+   } as const;
    export type ConfigItem = (typeof ConfigItem)[keyof typeof ConfigItem];
    export type ConfigItems = ConfigItem[];
 }
