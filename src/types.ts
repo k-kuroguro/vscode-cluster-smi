@@ -35,7 +35,7 @@ export interface Node {
    devices: Device[];
 }
 
-export interface ClusterSMIOutput {
+export interface ClusterSmiOutput {
    timestamp: Date;
    nodes: Node[];
 }

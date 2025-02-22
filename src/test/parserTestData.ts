@@ -1,4 +1,4 @@
-import type { ClusterSMIOutput } from '../types';
+import type { ClusterSmiOutput } from '../types';
 
 const rawValid = `
 [2JSat Feb 15 21:53:41 2025 (http://github.com/patwie/cluster-smi)
@@ -21,7 +21,7 @@ const rawValid = `
 +-------+------------------------------+---------------------------------+----------+-------+-------+-------+--------+-------+----------+------------+-------------------------+
 `;
 
-const parsedValid: ClusterSMIOutput = {
+const parsedValid: ClusterSmiOutput = {
    timestamp: new Date('Sat Feb 15 21:53:41 2025'),
    nodes: [
       {

@@ -2,9 +2,9 @@ import { type ChildProcess, spawn } from 'node:child_process';
 import type * as vscode from 'vscode';
 import { Config } from './config';
 import { OutputChannelLogger } from './logger';
-import { ClusterSMIParser } from './parser';
+import { ClusterSmiParser } from './parser';
 
-function runClusterSmi(execPath: string, logger: OutputChannelLogger, parser: ClusterSMIParser): ChildProcess {
+function runClusterSmi(execPath: string, logger: OutputChannelLogger, parser: ClusterSmiParser): ChildProcess {
    const clusterSmi = spawn(execPath, ['-p', '-d']);
    clusterSmi.stdout.on('data', (data) => {
       parser.write(data);
@@ -25,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
    disposables.push(config);
 
    const execPath = config.execPath;
-   const parser = new ClusterSMIParser();
+   const parser = new ClusterSmiParser();
    let clusterSmi = runClusterSmi(execPath, logger, parser);
    disposables.push({ dispose: () => clusterSmi.kill() });
 

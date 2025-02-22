@@ -1,7 +1,7 @@
 import * as assert from 'node:assert';
 import sinon from 'sinon';
-import { ClusterSMIParser, ParseError } from '../parser';
-import type { ClusterSMIOutput } from '../types';
+import { ClusterSmiParser, ParseError } from '../parser';
+import type { ClusterSmiOutput } from '../types';
 import { testData } from './parserTestData';
 
 /**
@@ -24,19 +24,19 @@ function splitTestData(data: string): { timestamp: string; table: string } {
 /**
  * Write the timestamp and table data to the parser separately, as this is how the output from cluster-smi is actually provided.
  */
-function writeTestData(parser: ClusterSMIParser, data: string): void {
+function writeTestData(parser: ClusterSmiParser, data: string): void {
    const { timestamp, table } = splitTestData(data);
    parser.write(Buffer.from(timestamp));
    parser.write(Buffer.from(table));
 }
 
-suite('ClusterSMIParser', () => {
-   let parser: ClusterSMIParser;
+suite('ClusterSmiParser', () => {
+   let parser: ClusterSmiParser;
    let onUpdateSpy: sinon.SinonSpy;
    let onErrorSpy: sinon.SinonSpy;
 
    setup(() => {
-      parser = new ClusterSMIParser();
+      parser = new ClusterSmiParser();
       onUpdateSpy = sinon.spy();
       onErrorSpy = sinon.spy();
       parser.onDidUpdate(onUpdateSpy);
@@ -56,7 +56,7 @@ suite('ClusterSMIParser', () => {
          assert.strictEqual(onUpdateSpy.calledOnce, true);
          assert.strictEqual(onErrorSpy.called, false);
 
-         const result = onUpdateSpy.getCalls()[0].args[0] as ClusterSMIOutput;
+         const result = onUpdateSpy.getCalls()[0].args[0] as ClusterSmiOutput;
 
          assert.deepStrictEqual(result, parsed);
       });

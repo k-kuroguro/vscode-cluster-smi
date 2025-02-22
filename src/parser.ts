@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { ClusterSMIOutput, Device, Memory, Node, Process, Runtime } from './types';
+import type { ClusterSmiOutput, Device, Memory, Node, Process, Runtime } from './types';
 import { isInvalidDate } from './utils';
 
 export class ParseError extends Error {
@@ -42,13 +42,13 @@ function hasAllProcessFields(row: TableRow): row is TableRow & { pid: string; us
    return row.pid !== undefined && row.user !== undefined && row.gpuMem !== undefined && row.runtime !== undefined;
 }
 
-export class ClusterSMIParser {
-   private _onDidUpdate: vscode.EventEmitter<ClusterSMIOutput> = new vscode.EventEmitter<ClusterSMIOutput>();
+export class ClusterSmiParser {
+   private _onDidUpdate: vscode.EventEmitter<ClusterSmiOutput> = new vscode.EventEmitter<ClusterSmiOutput>();
    private _onError: vscode.EventEmitter<ParseError> = new vscode.EventEmitter<ParseError>();
-   readonly onDidUpdate: vscode.Event<ClusterSMIOutput> = this._onDidUpdate.event;
+   readonly onDidUpdate: vscode.Event<ClusterSmiOutput> = this._onDidUpdate.event;
    readonly onError: vscode.Event<ParseError> = this._onError.event;
 
-   private result?: ClusterSMIOutput;
+   private result?: ClusterSmiOutput;
 
    write(data: Buffer): void {
       const lines = data
