@@ -3,6 +3,7 @@ import type * as vscode from 'vscode';
 import { Config } from './config';
 import { OutputChannelLogger } from './logger';
 import { ClusterSmiParser } from './parser';
+import { registerClusterSmiTreeView } from './treeView';
 
 function runClusterSmi(execPath: string, logger: OutputChannelLogger, parser: ClusterSmiParser): ChildProcess {
    const clusterSmi = spawn(execPath, ['-p', '-d']);
@@ -47,6 +48,8 @@ export function activate(context: vscode.ExtensionContext) {
          }
       }),
    );
+
+   disposables.push(...registerClusterSmiTreeView(context, parser));
 
    context.subscriptions.push(...disposables);
 }

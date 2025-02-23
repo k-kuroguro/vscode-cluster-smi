@@ -36,6 +36,15 @@
                "description": "Path to the cluster-smi executable."
             }
          }
+      },
+      "views": {
+         "explorer": [
+            {
+               "id": "clusterSmi",
+               "name": "cluster-smi",
+               "icon": "$(server)"
+            }
+         ]
       }
    },
    "scripts": {
