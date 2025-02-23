@@ -22,12 +22,12 @@ class DeviceItem extends vscode.TreeItem {
 }
 
 const DeviceInfoField = {
-   Utilization: 'Utilization',
-   Memory: 'Memory',
-   FanSpeed: 'FanSpeed',
-   Temperature: 'Temperature',
-   PowerUsage: 'PowerUsage',
-   Processes: 'Processes',
+   Utilization: 'utilization',
+   Memory: 'memory',
+   FanSpeed: 'fanSpeed',
+   Temperature: 'temperature',
+   PowerUsage: 'powerUsage',
+   Processes: 'processes',
 } as const;
 type DeviceInfoField = (typeof DeviceInfoField)[keyof typeof DeviceInfoField];
 
@@ -85,10 +85,10 @@ class ProcessItem extends vscode.TreeItem {
 }
 
 const ProcessInfoField = {
-   Pid: 'Pid',
-   UsedGpuMemory: 'UsedGpuMemory',
-   Username: 'Username',
-   Runtime: 'Runtime',
+   Pid: 'pid',
+   UsedGpuMemory: 'usedGpuMemory',
+   Username: 'username',
+   Runtime: 'runtime',
 } as const;
 type ProcessInfoField = (typeof ProcessInfoField)[keyof typeof ProcessInfoField];
 
