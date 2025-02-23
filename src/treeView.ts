@@ -44,7 +44,7 @@ class DeviceInfoItem extends vscode.TreeItem {
    private static getLabel(device: Device, field: DeviceInfoField): string {
       switch (field) {
          case DeviceInfoField.Utilization:
-            return 'GPU-Utili';
+            return 'GPU-Util';
          case DeviceInfoField.Memory:
             return 'Memory-Usage';
          case DeviceInfoField.FanSpeed:
