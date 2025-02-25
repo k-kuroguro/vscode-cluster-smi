@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import type { ClusterSmiParser } from './parser';
-import type { ClusterSmiOutput, Device, Node, Process } from './types';
+import type { ClusterSmiOutput, Device, Memory, Node, Process, Runtime } from './types';
 
 function padNumber(n: number, width: number): string {
    return n.toString().padStart(width, ' ');
@@ -31,17 +31,23 @@ const DeviceInfoField = {
 } as const;
 type DeviceInfoField = (typeof DeviceInfoField)[keyof typeof DeviceInfoField];
 
+type DeviceInfo =
+   | { field: typeof DeviceInfoField.Utilization; value: number }
+   | { field: typeof DeviceInfoField.Memory; value: Memory }
+   | { field: typeof DeviceInfoField.FanSpeed; value: number }
+   | { field: typeof DeviceInfoField.Temperature; value: number }
+   | { field: typeof DeviceInfoField.PowerUsage; value: number }
+   | { field: typeof DeviceInfoField.Processes; value: Process[] };
+
 class DeviceInfoItem extends vscode.TreeItem {
-   constructor(
-      readonly device: Device,
-      readonly field: DeviceInfoField,
-   ) {
-      super(DeviceInfoItem.getLabel(device, field), field === DeviceInfoField.Processes ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
+   constructor(deviceInfo: DeviceInfo) {
+      super(DeviceInfoItem.getLabel(deviceInfo), DeviceInfoItem.getCollapsibleState(deviceInfo));
       this.contextValue = 'gpuInfo';
-      this.description = DeviceInfoItem.getDescription(device, field);
+      this.description = DeviceInfoItem.getDescription(deviceInfo);
    }
 
-   private static getLabel(device: Device, field: DeviceInfoField): string {
+   private static getLabel(deviceInfo: DeviceInfo): string {
+      const { field } = deviceInfo;
       switch (field) {
          case DeviceInfoField.Utilization:
             return 'GPU-Util';
@@ -58,29 +64,34 @@ class DeviceInfoItem extends vscode.TreeItem {
       }
    }
 
-   private static getDescription(device: Device, field: DeviceInfoField): string {
+   private static getDescription(deviceInfo: DeviceInfo): string {
+      const { field, value } = deviceInfo;
       switch (field) {
          case DeviceInfoField.Utilization:
-            return `${padNumber(device.utilization, 3)} %`;
+            return `${padNumber(value, 3)} %`;
          case DeviceInfoField.Memory:
-            return `${padNumber(device.memory.used, 5)} MiB / ${padNumber(device.memory.total, 5)} MiB (${padNumber(device.memory.percentage, 3)} %)`;
+            return `${padNumber(value.used, 5)} MiB / ${padNumber(value.total, 5)} MiB (${padNumber(value.percentage, 3)} %)`;
          case DeviceInfoField.FanSpeed:
-            return `${padNumber(device.fanSpeed, 3)} %`;
+            return `${padNumber(value, 3)} %`;
          case DeviceInfoField.Temperature:
-            return `${padNumber(device.temperature, 3)} °C`;
+            return `${padNumber(value, 3)} °C`;
          case DeviceInfoField.PowerUsage:
-            return `${padNumber(device.powerUsage, 3)} W`;
+            return `${padNumber(value, 3)} W`;
          case DeviceInfoField.Processes:
-            return `Running: ${device.processes.length}`;
+            return `Running: ${value.length}`;
       }
+   }
+
+   private static getCollapsibleState(deviceInfo: DeviceInfo): vscode.TreeItemCollapsibleState {
+      return deviceInfo.field === DeviceInfoField.Processes ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
    }
 }
 
 class ProcessItem extends vscode.TreeItem {
    constructor(process: Process) {
       super(process.name, vscode.TreeItemCollapsibleState.Collapsed);
-      this.description = process.username;
       this.contextValue = 'process';
+      this.description = process.username;
    }
 }
 
@@ -92,17 +103,21 @@ const ProcessInfoField = {
 } as const;
 type ProcessInfoField = (typeof ProcessInfoField)[keyof typeof ProcessInfoField];
 
+type ProcessInfo =
+   | { field: typeof ProcessInfoField.Pid; value: number }
+   | { field: typeof ProcessInfoField.UsedGpuMemory; value: number }
+   | { field: typeof ProcessInfoField.Username; value: string }
+   | { field: typeof ProcessInfoField.Runtime; value: Runtime };
+
 class ProcessInfoItem extends vscode.TreeItem {
-   constructor(
-      process: Process,
-      readonly field: ProcessInfoField,
-   ) {
-      super(ProcessInfoItem.getLabel(process, field), vscode.TreeItemCollapsibleState.None);
-      this.description = ProcessInfoItem.getDescription(process, field);
+   constructor(processInfo: ProcessInfo) {
+      super(ProcessInfoItem.getLabel(processInfo), vscode.TreeItemCollapsibleState.None);
       this.contextValue = 'processInfo';
+      this.description = ProcessInfoItem.getDescription(processInfo);
    }
 
-   private static getLabel(process: Process, field: ProcessInfoField): string {
+   private static getLabel(processInfo: ProcessInfo): string {
+      const { field } = processInfo;
       switch (field) {
          case ProcessInfoField.Pid:
             return 'PID';
@@ -115,21 +130,24 @@ class ProcessInfoItem extends vscode.TreeItem {
       }
    }
 
-   private static getDescription(process: Process, field: ProcessInfoField): string {
+   private static getDescription(processInfo: ProcessInfo): string {
+      const { field, value } = processInfo;
       switch (field) {
          case ProcessInfoField.Pid:
-            return process.pid.toString();
+            return value.toString();
          case ProcessInfoField.UsedGpuMemory:
-            return `${padNumber(process.usedGpuMemory, 5)} MiB`;
+            return `${padNumber(value, 5)} MiB`;
          case ProcessInfoField.Username:
-            return process.username;
-         case ProcessInfoField.Runtime:
-            return `${padNumber(process.runtime.days, 2)} d ${padNumber(process.runtime.hours, 2)} h ${padNumber(process.runtime.minutes, 2)} m ${padNumber(process.runtime.seconds, 2)} s`;
+            return value;
+         case ProcessInfoField.Runtime: {
+            const { days, hours, minutes, seconds } = value;
+            return `${padNumber(days, 2)} d ${padNumber(hours, 2)} h ${padNumber(minutes, 2)} m ${padNumber(seconds, 2)} s`;
+         }
       }
    }
 }
 
-type Element = Node | Device | DeviceInfoItem | Process | ProcessInfoItem;
+type Element = Node | Device | DeviceInfo | Process | ProcessInfo;
 type TreeItem = NodeItem | DeviceItem | DeviceInfoItem | ProcessItem | ProcessInfoItem;
 
 function isNode(element: Element): element is Node {
@@ -139,9 +157,16 @@ function isNode(element: Element): element is Node {
 function isDevice(element: Element): element is Device {
    return 'processes' in element;
 }
+function isDeviceinfo(element: Element): element is DeviceInfo {
+   return 'field' in element && !(element.field in DeviceInfoField);
+}
 
 function isProcess(element: Element): element is Process {
    return 'pid' in element;
+}
+
+function isProcessInfo(element: Element): element is ProcessInfo {
+   return 'field' in element && !(element.field in ProcessInfoField);
 }
 
 class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
@@ -163,8 +188,16 @@ class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
          return new DeviceItem(element);
       }
 
+      if (isDeviceinfo(element)) {
+         return new DeviceInfoItem(element);
+      }
+
       if (isProcess(element)) {
          return new ProcessItem(element);
+      }
+
+      if (isProcessInfo(element)) {
+         return new ProcessInfoItem(element);
       }
 
       return element;
@@ -185,25 +218,25 @@ class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
 
       if (isDevice(element)) {
          return [
-            new DeviceInfoItem(element, DeviceInfoField.Utilization),
-            new DeviceInfoItem(element, DeviceInfoField.Memory),
-            new DeviceInfoItem(element, DeviceInfoField.FanSpeed),
-            new DeviceInfoItem(element, DeviceInfoField.Temperature),
-            new DeviceInfoItem(element, DeviceInfoField.PowerUsage),
-            new DeviceInfoItem(element, DeviceInfoField.Processes),
+            { field: DeviceInfoField.Utilization, value: element.utilization },
+            { field: DeviceInfoField.Memory, value: element.memory },
+            { field: DeviceInfoField.FanSpeed, value: element.fanSpeed },
+            { field: DeviceInfoField.Temperature, value: element.temperature },
+            { field: DeviceInfoField.PowerUsage, value: element.powerUsage },
+            { field: DeviceInfoField.Processes, value: element.processes },
          ];
       }
 
-      if (element instanceof DeviceInfoItem && element.field === DeviceInfoField.Processes) {
-         return element.device.processes;
+      if (isDeviceinfo(element) && element.field === DeviceInfoField.Processes) {
+         return element.value;
       }
 
       if (isProcess(element)) {
          return [
-            new ProcessInfoItem(element, ProcessInfoField.Pid),
-            new ProcessInfoItem(element, ProcessInfoField.UsedGpuMemory),
-            new ProcessInfoItem(element, ProcessInfoField.Username),
-            new ProcessInfoItem(element, ProcessInfoField.Runtime),
+            { field: ProcessInfoField.Pid, value: element.pid },
+            { field: ProcessInfoField.UsedGpuMemory, value: element.usedGpuMemory },
+            { field: ProcessInfoField.Username, value: element.username },
+            { field: ProcessInfoField.Runtime, value: element.runtime },
          ];
       }
 
