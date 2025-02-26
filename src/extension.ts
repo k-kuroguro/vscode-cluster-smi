@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
    const execPath = config.execPath;
    const parser = new ClusterSmiParser();
    let clusterSmi = runClusterSmi(execPath, logger, parser);
-   disposables.push({ dispose: () => clusterSmi.kill() });
+   disposables.push(parser, { dispose: () => clusterSmi.kill() });
 
    disposables.push(
       parser.onDidUpdate((output) => {

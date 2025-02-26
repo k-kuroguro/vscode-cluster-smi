@@ -49,6 +49,7 @@ export class ClusterSmiParser {
    readonly onError: vscode.Event<ParseError> = this._onError.event;
 
    private result?: ClusterSmiOutput;
+   private disposables: vscode.Disposable[] = [this._onDidUpdate, this._onError];
 
    write(data: Buffer): void {
       const lines = data
@@ -138,6 +139,12 @@ export class ClusterSmiParser {
 
       if (this.result && hasTableChanged) {
          this._onDidUpdate.fire(this.result);
+      }
+   }
+
+   dispose(): void {
+      for (const disposable of this.disposables) {
+         disposable.dispose();
       }
    }
 

@@ -174,6 +174,7 @@ class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
    readonly onDidChangeTreeData: vscode.Event<Element | Element[] | undefined> = this._onDidChangeTreeData.event;
 
    private output?: ClusterSmiOutput;
+   private disposables: vscode.Disposable[] = [this._onDidChangeTreeData];
 
    refresh(): void {
       this._onDidChangeTreeData.fire(undefined);
@@ -247,11 +248,18 @@ class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
       this.output = output;
       this.refresh();
    }
+
+   dispose(): void {
+      for (const disposable of this.disposables) {
+         disposable.dispose();
+      }
+   }
 }
 
 export function registerClusterSmiTreeView(context: vscode.ExtensionContext, parser: ClusterSmiParser): vscode.Disposable[] {
    const treeDataProvider = new ClusterSmiTreeDataProvider();
    return [
+      treeDataProvider,
       vscode.window.registerTreeDataProvider('clusterSmi', treeDataProvider),
       parser.onDidUpdate((output) => {
          treeDataProvider.update(output);

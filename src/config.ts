@@ -7,7 +7,7 @@ export class Config {
 
    private static instance: Config = new Config();
    private workspaceConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(extensionName);
-   private disposables: vscode.Disposable[] = [];
+   private disposables: vscode.Disposable[] = [this._onDidChangeConfig];
 
    private constructor() {
       this.disposables.push(
