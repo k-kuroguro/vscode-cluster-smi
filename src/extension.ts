@@ -1,20 +1,9 @@
-import { type ChildProcess, spawn } from 'node:child_process';
 import type * as vscode from 'vscode';
 import { Config } from './config';
 import { OutputChannelLogger } from './logger';
 import { ClusterSmiParser } from './parser';
+import { ClusterSmiProcessManager } from './processManager';
 import { registerClusterSmiTreeView } from './treeView';
-
-function runClusterSmi(execPath: string, logger: OutputChannelLogger, parser: ClusterSmiParser): ChildProcess {
-   const clusterSmi = spawn(execPath, ['-p', '-d']);
-   clusterSmi.stdout.on('data', (data) => {
-      parser.write(data);
-   });
-   clusterSmi.stderr.on('data', (data) => {
-      logger.error(data.toString());
-   });
-   return clusterSmi;
-}
 
 export function activate(context: vscode.ExtensionContext) {
    const disposables: vscode.Disposable[] = [];
@@ -25,10 +14,10 @@ export function activate(context: vscode.ExtensionContext) {
    const config = Config.getInstance();
    disposables.push(config);
 
-   const execPath = config.execPath;
    const parser = new ClusterSmiParser();
-   let clusterSmi = runClusterSmi(execPath, logger, parser);
-   disposables.push(parser, { dispose: () => clusterSmi.kill() });
+   const processManager = new ClusterSmiProcessManager();
+   processManager.start(config.execPath);
+   disposables.push(parser, processManager);
 
    disposables.push(
       parser.onDidUpdate((output) => {
@@ -37,14 +26,18 @@ export function activate(context: vscode.ExtensionContext) {
       parser.onError((error) => {
          logger.error(error);
       }),
+      processManager.onStdout((data) => {
+         parser.write(data);
+      }),
+      processManager.onStderr((data) => {
+         console.error(data.toString());
+      }),
    );
 
    disposables.push(
       config.onDidChangeConfig((items) => {
          if (items.includes(Config.ConfigItem.ExecPath)) {
-            logger.info(`execPath changed: ${config.execPath}`);
-            clusterSmi.kill();
-            clusterSmi = runClusterSmi(config.execPath, logger, parser);
+            processManager.restart(config.execPath);
          }
       }),
    );
