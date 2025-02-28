@@ -157,8 +157,9 @@ function isNode(element: Element): element is Node {
 function isDevice(element: Element): element is Device {
    return 'processes' in element;
 }
+
 function isDeviceinfo(element: Element): element is DeviceInfo {
-   return 'field' in element && !(element.field in DeviceInfoField);
+   return 'field' in element && (Object.values(DeviceInfoField) as string[]).includes(element.field);
 }
 
 function isProcess(element: Element): element is Process {
@@ -166,7 +167,7 @@ function isProcess(element: Element): element is Process {
 }
 
 function isProcessInfo(element: Element): element is ProcessInfo {
-   return 'field' in element && !(element.field in ProcessInfoField);
+   return 'field' in element && (Object.values(ProcessInfoField) as string[]).includes(element.field);
 }
 
 class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
