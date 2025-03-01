@@ -1,6 +1,5 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 import { Config } from './config';
-import { DeviceHighlightProvider } from './deviceHighlightProvider';
 import { OutputChannelLogger } from './logger';
 import { ClusterSmiParser } from './parser';
 import { ClusterSmiProcessManager } from './processManager';
@@ -14,9 +13,6 @@ export function activate(context: vscode.ExtensionContext) {
 
    const config = Config.getInstance();
    disposables.push(config);
-
-   const deviceHighlightProvider = new DeviceHighlightProvider();
-   disposables.push(vscode.window.registerFileDecorationProvider(deviceHighlightProvider));
 
    const parser = new ClusterSmiParser();
    const processManager = new ClusterSmiProcessManager();

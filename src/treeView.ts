@@ -1,7 +1,44 @@
 import * as vscode from 'vscode';
-import { createDeviceUri } from './deviceHighlightProvider';
+import { uriScheme } from './constants';
 import type { ClusterSmiParser } from './parser';
 import type { ClusterSmiOutput, Device, Memory, Node, Process, Runtime } from './types';
+
+const deviceAuthority = 'device';
+const availableDeviceColor = new vscode.ThemeColor('terminal.ansiGreen');
+
+interface DeviceUriQuery {
+   available: boolean;
+}
+
+function createDeviceUri(query: DeviceUriQuery): vscode.Uri {
+   return vscode.Uri.parse(`${uriScheme}://${deviceAuthority}?${query.available ? 'available=true' : ''}`);
+}
+
+function isDeviceUri(uri: vscode.Uri): boolean {
+   return uri.scheme === uriScheme && uri.authority === deviceAuthority;
+}
+
+function parseQuery(query: string): DeviceUriQuery {
+   const searchParams = new URLSearchParams(query);
+   return {
+      available: searchParams.get('available') === 'true',
+   };
+}
+
+class DeviceHighlightProvider implements vscode.FileDecorationProvider {
+   async provideFileDecoration(uri: vscode.Uri, token: vscode.CancellationToken): Promise<vscode.FileDecoration | undefined> {
+      if (isDeviceUri(uri)) {
+         const query = parseQuery(uri.query);
+         if (query.available) {
+            return {
+               color: availableDeviceColor,
+               tooltip: 'Available',
+               propagate: false,
+            };
+         }
+      }
+   }
+}
 
 function padNumber(n: number, width: number): string {
    return n.toString().padStart(width, ' ');
@@ -270,6 +307,7 @@ export function registerClusterSmiTreeView(context: vscode.ExtensionContext, par
    return [
       treeDataProvider,
       vscode.window.registerTreeDataProvider('clusterSmi', treeDataProvider),
+      vscode.window.registerFileDecorationProvider(new DeviceHighlightProvider()),
       parser.onDidUpdate((output) => {
          treeDataProvider.update(output);
       }),
