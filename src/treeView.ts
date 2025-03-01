@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { createDeviceUri } from './deviceHighlightProvider';
 import type { ClusterSmiParser } from './parser';
 import type { ClusterSmiOutput, Device, Memory, Node, Process, Runtime } from './types';
 
@@ -6,10 +7,15 @@ function padNumber(n: number, width: number): string {
    return n.toString().padStart(width, ' ');
 }
 
+function isAvailableDevice(device: Device): boolean {
+   return device.processes.length === 0;
+}
+
 class NodeItem extends vscode.TreeItem {
    constructor(node: Node) {
       super(node.hostname, vscode.TreeItemCollapsibleState.Collapsed);
       this.contextValue = 'node';
+      this.iconPath = new vscode.ThemeIcon('server-environment');
    }
 }
 
@@ -18,6 +24,8 @@ class DeviceItem extends vscode.TreeItem {
       super(device.id.toString(), vscode.TreeItemCollapsibleState.Collapsed);
       this.contextValue = 'device';
       this.description = device.name;
+      this.iconPath = new vscode.ThemeIcon('chip');
+      this.resourceUri = createDeviceUri({ available: isAvailableDevice(device) });
    }
 }
 
