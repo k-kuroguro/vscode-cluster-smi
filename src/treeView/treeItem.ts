@@ -36,6 +36,7 @@ export class DeviceItem extends vscode.TreeItem {
       this.description = device.name;
       this.iconPath = new vscode.ThemeIcon('chip', isAvailableDevice(device) ? availableDeviceColor : undefined);
       this.resourceUri = createDeviceUri({ available: isAvailableDevice(device) });
+      this.tooltip = `${device.id}: ${device.name}`;
    }
 }
 
