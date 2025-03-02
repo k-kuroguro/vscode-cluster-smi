@@ -84,7 +84,7 @@
       "views": {
          "explorer": [
             {
-               "id": "clusterSmi",
+               "id": "cluster-smi.treeView",
                "name": "cluster-smi",
                "icon": "$(server)"
             }

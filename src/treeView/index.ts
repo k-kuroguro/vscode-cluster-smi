@@ -7,7 +7,7 @@ export function registerClusterSmiTreeView(context: vscode.ExtensionContext, par
    const treeDataProvider = new ClusterSmiTreeDataProvider();
    return [
       treeDataProvider,
-      vscode.window.registerTreeDataProvider('clusterSmi', treeDataProvider),
+      vscode.window.registerTreeDataProvider('cluster-smi.treeView', treeDataProvider),
       vscode.window.registerFileDecorationProvider(new DeviceHighlightProvider()),
       parser.onDidUpdate((output) => {
          treeDataProvider.update(output);
