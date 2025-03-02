@@ -61,7 +61,7 @@ class DeviceItem extends vscode.TreeItem {
       super(device.id.toString(), vscode.TreeItemCollapsibleState.Collapsed);
       this.contextValue = 'device';
       this.description = device.name;
-      this.iconPath = new vscode.ThemeIcon('chip');
+      this.iconPath = new vscode.ThemeIcon('chip', isAvailableDevice(device) ? availableDeviceColor : undefined);
       this.resourceUri = createDeviceUri({ available: isAvailableDevice(device) });
    }
 }
