@@ -72,6 +72,7 @@ export class ClusterSmiProcessManager {
       if (this.process) {
          this.shouldBeRunning = false;
          this.process.kill();
+         this.process.removeAllListeners();
          this.process = undefined;
       }
    }
