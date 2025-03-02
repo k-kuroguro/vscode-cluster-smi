@@ -1,5 +1,6 @@
 import { type ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
 import * as vscode from 'vscode';
+import { Config } from './config';
 
 export class ProcessAlreadyRunningError extends Error {
    name = 'ProcessAlreadyRunningError';
@@ -12,14 +13,25 @@ export class ClusterSmiProcessManager {
    readonly onStdout: vscode.Event<Buffer> = this._onStdout.event;
    readonly onStderr: vscode.Event<Buffer> = this._onStderr.event;
 
+   private config = Config.getInstance();
    private process?: ChildProcessWithoutNullStreams;
    private disposables: vscode.Disposable[] = [this._onStdout, this._onStderr];
 
-   start(execPath: string): void {
+   constructor() {
+      this.disposables.push(
+         this.config.onDidChangeConfig((items) => {
+            if (items.includes(Config.ConfigItem.ExecPath) && this.process) {
+               this.restart();
+            }
+         }),
+      );
+   }
+
+   start(): void {
       if (this.process) {
          throw new ProcessAlreadyRunningError();
       }
-      this.process = spawn(execPath, ['-p', '-d']);
+      this.process = spawn(this.config.execPath, ['-p', '-d']);
       this.process.stdout.on('data', (data: Buffer) => this._onStdout.fire(data));
       this.process.stderr.on('data', (data: Buffer) => this._onStderr.fire(data));
    }
@@ -31,9 +43,9 @@ export class ClusterSmiProcessManager {
       }
    }
 
-   restart(execPath: string): void {
+   restart(): void {
       this.stop();
-      this.start(execPath);
+      this.start();
    }
 
    dispose(): void {

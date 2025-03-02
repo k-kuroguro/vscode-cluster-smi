@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 
    const parser = new ClusterSmiParser();
    const processManager = new ClusterSmiProcessManager();
-   processManager.start(config.execPath);
+   processManager.start();
    disposables.push(parser, processManager);
 
    disposables.push(
@@ -31,14 +31,6 @@ export function activate(context: vscode.ExtensionContext) {
       }),
       processManager.onStderr((data) => {
          console.error(data.toString());
-      }),
-   );
-
-   disposables.push(
-      config.onDidChangeConfig((items) => {
-         if (items.includes(Config.ConfigItem.ExecPath)) {
-            processManager.restart(config.execPath);
-         }
       }),
    );
 
