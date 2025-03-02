@@ -3,10 +3,7 @@ import type { ClusterSmiOutput, Device, Memory, Node, Process, Runtime } from '.
 import { isInvalidDate } from './utils';
 
 export class ParseError extends Error {
-   constructor(message: string) {
-      super(message);
-      this.name = 'ParseError';
-   }
+   name = 'ParseError';
 }
 
 const TABLE_ROW_LENGTH = 12;
