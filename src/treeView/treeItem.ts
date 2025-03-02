@@ -4,7 +4,22 @@ import type { Device, DeviceInfo, Node, Process, ProcessInfo } from '../types';
 import { availableDeviceColor, createDeviceUri } from './deviceHighlight';
 import { isAvailableDevice, padNumber } from './utils';
 
-export type TreeItem = NodeItem | DeviceItem | DeviceInfoItem | ProcessItem | ProcessInfoItem;
+export type TreeItem = TimestampItem | NodeItem | DeviceItem | DeviceInfoItem | ProcessItem | ProcessInfoItem;
+
+export class TimestampItem extends vscode.TreeItem {
+   constructor(timestamp: Date) {
+      super(TimestampItem.getLabel(timestamp), vscode.TreeItemCollapsibleState.None);
+      this.contextValue = 'timestamp';
+      this.tooltip = `Last updated: ${this.label}`;
+   }
+
+   private static getLabel(timestamp: Date): string {
+      return timestamp
+         .toISOString()
+         .replace('T', ' ')
+         .replace(/\.\d+Z$/, ''); // YYYY-MM-DDTHH:mm:ss.fffZ -> YYYY-MM-DD HH:mm:ss
+   }
+}
 
 export class NodeItem extends vscode.TreeItem {
    constructor(node: Node) {

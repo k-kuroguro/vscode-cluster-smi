@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 import { Config } from '../config';
 import type { ClusterSmiOutput, Device, DeviceInfo, Node, Process, ProcessInfo } from '../types';
 import { DeviceInfoField, ProcessInfoField } from '../types';
-import { DeviceInfoItem, DeviceItem, NodeItem, ProcessInfoItem, ProcessItem, type TreeItem } from './treeItem';
+import { DeviceInfoItem, DeviceItem, NodeItem, ProcessInfoItem, ProcessItem, TimestampItem, type TreeItem } from './treeItem';
 
-type Element = Node | Device | DeviceInfo | Process | ProcessInfo;
+type Element = Date | Node | Device | DeviceInfo | Process | ProcessInfo;
 
 function isNode(element: Element): element is Node {
    return 'devices' in element;
@@ -69,7 +69,7 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
          return new ProcessInfoItem(element);
       }
 
-      return element;
+      return new TimestampItem(element);
    }
 
    getChildren(element?: Element): Element[] {
@@ -78,7 +78,7 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
       }
 
       if (!element) {
-         return this.output.nodes;
+         return [this.output.timestamp, ...this.output.nodes];
       }
 
       if (isNode(element)) {
