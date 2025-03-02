@@ -25,7 +25,30 @@
    ],
    "main": "./dist/extension.js",
    "contributes": {
-      "commands": [],
+      "commands": [
+         {
+            "command": "cluster-smi.showOutputChannel",
+            "title": "Show cluster-smi output channel",
+            "category": "cluster-smi"
+         },
+         {
+            "command": "cluster-smi.startProcess",
+            "title": "Start cluster-smi process",
+            "category": "cluster-smi"
+         }
+      ],
+      "menus": {
+         "commandPalette": [
+            {
+               "command": "cluster-smi.showOutputChannel",
+               "when": "false"
+            },
+            {
+               "command": "cluster-smi.startProcess",
+               "when": "false"
+            }
+         ]
+      },
       "configuration": {
          "type": "object",
          "title": "cluster-smi",
@@ -89,7 +112,19 @@
                "icon": "$(server)"
             }
          ]
-      }
+      },
+      "viewsWelcome": [
+         {
+            "view": "cluster-smi.treeView",
+            "contents": "cluster-smi process has exited successfully.\n[Restart Process](command:cluster-smi.startProcess)",
+            "when": "cluster-smi.processExitedSuccessfully"
+         },
+         {
+            "view": "cluster-smi.treeView",
+            "contents": "cluster-smi process has exited with an error.\nCheck the output for details.\n[Show Output](command:cluster-smi.showOutputChannel)\n[Restart Process](command:cluster-smi.startProcess)",
+            "when": "cluster-smi.processExitedWithError"
+         }
+      ]
    },
    "scripts": {
       "vscode:prepublish": "npm run package",

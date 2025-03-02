@@ -126,7 +126,7 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
       return [];
    }
 
-   update(output: ClusterSmiOutput): void {
+   update(output?: ClusterSmiOutput): void {
       this.output = output;
       this.refresh();
    }

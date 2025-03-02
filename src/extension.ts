@@ -1,9 +1,23 @@
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 import { Config } from './config';
-import { OutputChannelLogger } from './logger';
-import { ClusterSmiParser } from './parser';
-import { ClusterSmiProcessManager } from './processManager';
+import { extensionName } from './constants';
+import { type Logger, OutputChannelLogger } from './logger';
+import { ClusterSmiParser, type ParseError } from './parser';
+import { ClusterSmiProcessManager, ProcessAlreadyRunningError } from './processManager';
 import { registerClusterSmiTreeView } from './treeView';
+
+function handleCmdError(logger: Logger, error: Error | Buffer) {
+   const prefix = 'An error occurred while executing the command:';
+   if (error instanceof Error) {
+      logger.error(`${prefix} ${error.stack ?? error.message ?? String(error)}`);
+   } else {
+      logger.error(`${prefix} ${error.toString()}`);
+   }
+}
+
+function handleParserError(logger: Logger, error: ParseError) {
+   logger.error(`An error occurred during parsing: ${error.stack ?? error.message ?? String(error)}`);
+}
 
 export function activate(context: vscode.ExtensionContext) {
    const disposables: vscode.Disposable[] = [];
@@ -20,21 +34,37 @@ export function activate(context: vscode.ExtensionContext) {
    disposables.push(parser, processManager);
 
    disposables.push(
-      parser.onDidUpdate((output) => {
-         logger.info(output);
-      }),
       parser.onError((error) => {
-         logger.error(error);
+         handleParserError(logger, error);
       }),
       processManager.onStdout((data) => {
          parser.write(data);
       }),
       processManager.onStderr((data) => {
-         console.error(data.toString());
+         handleCmdError(logger, data);
+      }),
+      processManager.onError((error) => {
+         handleCmdError(logger, error);
       }),
    );
 
-   disposables.push(...registerClusterSmiTreeView(context, parser));
+   disposables.push(
+      vscode.commands.registerCommand(`${extensionName}.showOutputChannel`, () => {
+         logger.show();
+      }),
+      vscode.commands.registerCommand(`${extensionName}.startProcess`, () => {
+         try {
+            processManager.start();
+         } catch (error) {
+            if (error instanceof ProcessAlreadyRunningError) {
+               vscode.window.showInformationMessage('cluster-smi is already running.');
+            } else {
+               throw error;
+            }
+         }
+      }),
+   );
+   disposables.push(...registerClusterSmiTreeView(parser, processManager));
 
    context.subscriptions.push(...disposables);
 }

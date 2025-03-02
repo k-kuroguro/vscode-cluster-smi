@@ -34,6 +34,10 @@ export class OutputChannelLogger implements Logger {
       this.channel.error(util.format(...data));
    }
 
+   show(): void {
+      this.channel.show();
+   }
+
    dispose(): void {
       this.channel.dispose();
    }
