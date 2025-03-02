@@ -39,3 +39,21 @@ export interface ClusterSmiOutput {
    timestamp: Date;
    nodes: Node[];
 }
+
+export const DeviceInfoField = {
+   Utilization: 'utilization',
+   Memory: 'memory',
+   FanSpeed: 'fanSpeed',
+   Temperature: 'temperature',
+   PowerUsage: 'powerUsage',
+   Processes: 'processes',
+} as const;
+export type DeviceInfoField = (typeof DeviceInfoField)[keyof typeof DeviceInfoField];
+
+export const ProcessInfoField = {
+   Pid: 'pid',
+   UsedGpuMemory: 'usedGpuMemory',
+   Username: 'username',
+   Runtime: 'runtime',
+} as const;
+export type ProcessInfoField = (typeof ProcessInfoField)[keyof typeof ProcessInfoField];

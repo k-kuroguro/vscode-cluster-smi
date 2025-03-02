@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
+import { Config } from './config';
 import { uriScheme } from './constants';
 import type { ClusterSmiParser } from './parser';
 import type { ClusterSmiOutput, Device, Memory, Node, Process, Runtime } from './types';
+import { DeviceInfoField, ProcessInfoField } from './types';
 
 const deviceAuthority = 'device';
 const availableDeviceColor = new vscode.ThemeColor('terminal.ansiGreen');
@@ -66,16 +68,6 @@ class DeviceItem extends vscode.TreeItem {
    }
 }
 
-const DeviceInfoField = {
-   Utilization: 'utilization',
-   Memory: 'memory',
-   FanSpeed: 'fanSpeed',
-   Temperature: 'temperature',
-   PowerUsage: 'powerUsage',
-   Processes: 'processes',
-} as const;
-type DeviceInfoField = (typeof DeviceInfoField)[keyof typeof DeviceInfoField];
-
 type DeviceInfo =
    | { field: typeof DeviceInfoField.Utilization; value: number }
    | { field: typeof DeviceInfoField.Memory; value: Memory }
@@ -139,14 +131,6 @@ class ProcessItem extends vscode.TreeItem {
       this.description = process.username;
    }
 }
-
-const ProcessInfoField = {
-   Pid: 'pid',
-   UsedGpuMemory: 'usedGpuMemory',
-   Username: 'username',
-   Runtime: 'runtime',
-} as const;
-type ProcessInfoField = (typeof ProcessInfoField)[keyof typeof ProcessInfoField];
 
 type ProcessInfo =
    | { field: typeof ProcessInfoField.Pid; value: number }
@@ -221,6 +205,17 @@ class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
 
    private output?: ClusterSmiOutput;
    private disposables: vscode.Disposable[] = [this._onDidChangeTreeData];
+   private config = Config.getInstance();
+
+   constructor() {
+      this.disposables.push(
+         this.config.onDidChangeConfig((items) => {
+            if (items.some((item) => item === Config.ConfigItem.DeviceInfoFields || item === Config.ConfigItem.ProcessInfoFields)) {
+               this.refresh();
+            }
+         }),
+      );
+   }
 
    refresh(): void {
       this._onDidChangeTreeData.fire(undefined);
@@ -264,14 +259,22 @@ class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
       }
 
       if (isDevice(element)) {
-         return [
-            { field: DeviceInfoField.Utilization, value: element.utilization },
-            { field: DeviceInfoField.Memory, value: element.memory },
-            { field: DeviceInfoField.FanSpeed, value: element.fanSpeed },
-            { field: DeviceInfoField.Temperature, value: element.temperature },
-            { field: DeviceInfoField.PowerUsage, value: element.powerUsage },
-            { field: DeviceInfoField.Processes, value: element.processes },
-         ];
+         return this.config.deviceInfoFields.map((field) => {
+            switch (field) {
+               case DeviceInfoField.Utilization:
+                  return { field, value: element.utilization };
+               case DeviceInfoField.Memory:
+                  return { field, value: element.memory };
+               case DeviceInfoField.FanSpeed:
+                  return { field, value: element.fanSpeed };
+               case DeviceInfoField.Temperature:
+                  return { field, value: element.temperature };
+               case DeviceInfoField.PowerUsage:
+                  return { field, value: element.powerUsage };
+               case DeviceInfoField.Processes:
+                  return { field, value: element.processes };
+            }
+         });
       }
 
       if (isDeviceinfo(element) && element.field === DeviceInfoField.Processes) {
@@ -279,12 +282,18 @@ class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
       }
 
       if (isProcess(element)) {
-         return [
-            { field: ProcessInfoField.Pid, value: element.pid },
-            { field: ProcessInfoField.UsedGpuMemory, value: element.usedGpuMemory },
-            { field: ProcessInfoField.Username, value: element.username },
-            { field: ProcessInfoField.Runtime, value: element.runtime },
-         ];
+         return this.config.processInfoFields.map((field) => {
+            switch (field) {
+               case ProcessInfoField.Pid:
+                  return { field, value: element.pid };
+               case ProcessInfoField.UsedGpuMemory:
+                  return { field, value: element.usedGpuMemory };
+               case ProcessInfoField.Username:
+                  return { field, value: element.username };
+               case ProcessInfoField.Runtime:
+                  return { field, value: element.runtime };
+            }
+         });
       }
 
       return [];

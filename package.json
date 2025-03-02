@@ -34,6 +34,50 @@
                "type": "string",
                "default": "cluster-smi",
                "description": "Path to the cluster-smi executable."
+            },
+            "cluster-smi.deviceInfoFields": {
+               "type": "array",
+               "items": {
+                  "type": "string",
+                  "enum": [
+                     "utilization",
+                     "memory",
+                     "fanSpeed",
+                     "temperature",
+                     "powerUsage",
+                     "processes"
+                  ]
+               },
+               "default": [
+                  "utilization",
+                  "memory",
+                  "fanSpeed",
+                  "temperature",
+                  "powerUsage",
+                  "processes"
+               ],
+               "uniqueItems": true,
+               "description": "List of device information fields to be displayed."
+            },
+            "cluster-smi.processInfoFields": {
+               "type": "array",
+               "items": {
+                  "type": "string",
+                  "enum": [
+                     "pid",
+                     "usedGpuMemory",
+                     "username",
+                     "runtime"
+                  ]
+               },
+               "default": [
+                  "pid",
+                  "usedGpuMemory",
+                  "username",
+                  "runtime"
+               ],
+               "uniqueItems": true,
+               "description": "List of process information fields to be displayed."
             }
          }
       },

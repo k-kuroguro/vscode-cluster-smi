@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { extensionName } from './constants';
+import { DeviceInfoField, ProcessInfoField } from './types';
 
 export class Config {
    private _onDidChangeConfig: vscode.EventEmitter<Config.ConfigItems> = new vscode.EventEmitter<Config.ConfigItems>();
@@ -13,7 +14,8 @@ export class Config {
       this.disposables.push(
          vscode.workspace.onDidChangeConfiguration((e) => {
             this.loadWorkspaceConfig();
-            if (e.affectsConfiguration(`${extensionName}.${Config.ConfigItem.ExecPath}`)) this._onDidChangeConfig.fire([Config.ConfigItem.ExecPath]);
+            const changedItems = Object.values(Config.ConfigItem).filter((item) => e.affectsConfiguration(`${extensionName}.${item}`));
+            if (changedItems.length) this._onDidChangeConfig.fire(changedItems);
          }),
       );
    }
@@ -40,11 +42,31 @@ export class Config {
       this.workspaceConfig.update(Config.ConfigItem.ExecPath, path, vscode.ConfigurationTarget.Global);
       this._onDidChangeConfig.fire([Config.ConfigItem.ExecPath]);
    }
+
+   get deviceInfoFields(): DeviceInfoField[] {
+      return this.workspaceConfig.get(Config.ConfigItem.DeviceInfoFields) ?? Object.values(DeviceInfoField);
+   }
+
+   set deviceInfoFields(fields: DeviceInfoField[]) {
+      this.workspaceConfig.update(Config.ConfigItem.DeviceInfoFields, fields, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.DeviceInfoFields]);
+   }
+
+   get processInfoFields(): ProcessInfoField[] {
+      return this.workspaceConfig.get(Config.ConfigItem.ProcessInfoFields) ?? Object.values(ProcessInfoField);
+   }
+
+   set processInfoFields(fields: ProcessInfoField[]) {
+      this.workspaceConfig.update(Config.ConfigItem.ProcessInfoFields, fields, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.ProcessInfoFields]);
+   }
 }
 
 export namespace Config {
    export const ConfigItem = {
       ExecPath: 'execPath',
+      DeviceInfoFields: 'deviceInfoFields',
+      ProcessInfoFields: 'processInfoFields',
    } as const;
    export type ConfigItem = (typeof ConfigItem)[keyof typeof ConfigItem];
    export type ConfigItems = ConfigItem[];
