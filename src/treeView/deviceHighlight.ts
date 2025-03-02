@@ -3,7 +3,7 @@ import { uriScheme } from '../constants';
 
 const deviceAuthority = 'device';
 
-export const availableDeviceColor = new vscode.ThemeColor('terminal.ansiGreen');
+export const availableDeviceColor = new vscode.ThemeColor('terminal.ansiBrightGreen');
 
 export interface DeviceUriQuery {
    available: boolean;
@@ -30,6 +30,7 @@ export class DeviceHighlightProvider implements vscode.FileDecorationProvider {
          const query = parseQuery(uri.query);
          if (query.available) {
             return {
+               badge: 'A',
                color: availableDeviceColor,
                tooltip: 'Available',
                propagate: false,
