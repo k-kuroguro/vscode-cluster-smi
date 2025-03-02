@@ -1,6 +1,11 @@
 import { type ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
 import * as vscode from 'vscode';
 
+export class ProcessAlreadyRunningError extends Error {
+   name = 'ProcessAlreadyRunningError';
+   message = 'Process is already running';
+}
+
 export class ClusterSmiProcessManager {
    private _onStdout: vscode.EventEmitter<Buffer> = new vscode.EventEmitter<Buffer>();
    private _onStderr: vscode.EventEmitter<Buffer> = new vscode.EventEmitter<Buffer>();
@@ -11,6 +16,9 @@ export class ClusterSmiProcessManager {
    private disposables: vscode.Disposable[] = [this._onStdout, this._onStderr];
 
    start(execPath: string): void {
+      if (this.process) {
+         throw new ProcessAlreadyRunningError();
+      }
       this.process = spawn(execPath, ['-p', '-d']);
       this.process.stdout.on('data', (data: Buffer) => this._onStdout.fire(data));
       this.process.stderr.on('data', (data: Buffer) => this._onStderr.fire(data));
