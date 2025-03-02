@@ -50,6 +50,14 @@ export const DeviceInfoField = {
 } as const;
 export type DeviceInfoField = (typeof DeviceInfoField)[keyof typeof DeviceInfoField];
 
+export type DeviceInfo =
+   | { field: typeof DeviceInfoField.Utilization; value: number }
+   | { field: typeof DeviceInfoField.Memory; value: Memory }
+   | { field: typeof DeviceInfoField.FanSpeed; value: number }
+   | { field: typeof DeviceInfoField.Temperature; value: number }
+   | { field: typeof DeviceInfoField.PowerUsage; value: number }
+   | { field: typeof DeviceInfoField.Processes; value: Process[] };
+
 export const ProcessInfoField = {
    Pid: 'pid',
    UsedGpuMemory: 'usedGpuMemory',
@@ -57,3 +65,9 @@ export const ProcessInfoField = {
    Runtime: 'runtime',
 } as const;
 export type ProcessInfoField = (typeof ProcessInfoField)[keyof typeof ProcessInfoField];
+
+export type ProcessInfo =
+   | { field: typeof ProcessInfoField.Pid; value: number }
+   | { field: typeof ProcessInfoField.UsedGpuMemory; value: number }
+   | { field: typeof ProcessInfoField.Username; value: string }
+   | { field: typeof ProcessInfoField.Runtime; value: Runtime };
