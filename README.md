@@ -16,7 +16,7 @@ Displays the output of [cluster-smi](https://github.com/PatWie/cluster-smi) as a
 
 ## Getting Started
 
-1. Install the extension from [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=k-kuroguro.vscode-cluster-smi) or [Open VSX Registry](https://open-vsx.org/extension/k-kuroguro/vscode-cluster-smi).
+1. Install the extension from [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=k-kuroguro.cluster-smi) or [Open VSX Registry](https://open-vsx.org/extension/k-kuroguro/cluster-smi).
 2. After installation, a cluster-smi tree view will be added to the Explorer in the Activity Bar.
 
 ## Settings
