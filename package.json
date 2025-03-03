@@ -140,6 +140,11 @@
       "viewsWelcome": [
          {
             "view": "cluster-smi.treeView",
+            "contents": "Waiting for cluster-smi output...",
+            "when": "!cluster-smi.processExitedSuccessfully && !cluster-smi.processExitedWithError && !cluster-smi.outputIsEmpty"
+         },
+         {
+            "view": "cluster-smi.treeView",
             "contents": "cluster-smi process has exited successfully.\n[Restart Process](command:cluster-smi.startProcess)",
             "when": "cluster-smi.processExitedSuccessfully"
          },
