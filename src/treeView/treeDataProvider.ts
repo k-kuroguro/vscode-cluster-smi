@@ -4,7 +4,7 @@ import type { ClusterSmiOutput, Device, DeviceInfo, Node, Process, ProcessInfo }
 import { DeviceInfoField, ProcessInfoField } from '../types';
 import { DeviceInfoItem, DeviceItem, NodeItem, ProcessInfoItem, ProcessItem, TimestampItem, type TreeItem } from './treeItem';
 
-type Element = Date | Node | Device | DeviceInfo | Process | ProcessInfo;
+export type Element = Date | Node | Device | DeviceInfo | Process | ProcessInfo;
 
 function isNode(element: Element): element is Node {
    return 'devices' in element;

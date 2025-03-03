@@ -1,37 +1,34 @@
 import * as vscode from 'vscode';
 import { extensionName } from '../constants';
-import type { ClusterSmiParser } from '../parser';
-import type { ClusterSmiProcessManager } from '../processManager';
-import { WelcomeViewContexts } from '../welcomeViewContext';
+import type { ClusterSmiOutput } from '../types';
 import { DeviceHighlightProvider } from './deviceHighlight';
-import { ClusterSmiTreeDataProvider } from './treeDataProvider';
+import { ClusterSmiTreeDataProvider, type Element } from './treeDataProvider';
 
-export function registerClusterSmiTreeView(parser: ClusterSmiParser, processManager: ClusterSmiProcessManager): vscode.Disposable[] {
-   const treeDataProvider = new ClusterSmiTreeDataProvider();
-   const treeView = vscode.window.createTreeView(`${extensionName}.treeView`, { treeDataProvider, showCollapseAll: true });
-   return [
-      treeDataProvider,
-      treeView,
-      vscode.window.registerFileDecorationProvider(new DeviceHighlightProvider()),
-      vscode.commands.registerCommand(`${extensionName}.treeView.refresh`, () => {
-         treeDataProvider.refresh();
-      }),
-      parser.onDidUpdate((output) => {
-         if (output.nodes.length) {
-            WelcomeViewContexts.setOutputIsEmpty(false);
-            treeDataProvider.update(output);
-         } else {
-            WelcomeViewContexts.setOutputIsEmpty(true);
-            treeDataProvider.update();
-         }
-      }),
-      processManager.onExit(() => {
-         // For both successful and error exits.
-         treeDataProvider.update();
-      }),
-      processManager.onError((error) => {
-         // For errors like spawn ENOENT (process start errors).
-         treeDataProvider.update();
-      }),
-   ];
+export class ClusterSmiTreeView {
+   private readonly treeDataProvider: ClusterSmiTreeDataProvider;
+   private treeView: vscode.TreeView<Element>;
+   private disposables: vscode.Disposable[] = [];
+
+   constructor() {
+      this.treeDataProvider = new ClusterSmiTreeDataProvider();
+      this.treeView = vscode.window.createTreeView(`${extensionName}.treeView`, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
+      this.disposables.push(
+         this.treeDataProvider,
+         this.treeView,
+         vscode.window.registerFileDecorationProvider(new DeviceHighlightProvider()),
+         vscode.commands.registerCommand(`${extensionName}.treeView.refresh`, () => {
+            this.treeDataProvider.refresh();
+         }),
+      );
+   }
+
+   update(output?: ClusterSmiOutput): void {
+      this.treeDataProvider.update(output);
+   }
+
+   dispose(): void {
+      for (const disposable of this.disposables) {
+         disposable.dispose();
+      }
+   }
 }

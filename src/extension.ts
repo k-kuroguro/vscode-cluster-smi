@@ -4,7 +4,7 @@ import { extensionName } from './constants';
 import { LogLevel, type Logger, OutputChannelLogger } from './logger';
 import { ClusterSmiParser, type ParseError } from './parser';
 import { ClusterSmiProcessManager, ProcessAlreadyRunningError } from './processManager';
-import { registerClusterSmiTreeView } from './treeView';
+import { ClusterSmiTreeView } from './treeView';
 import { isProcessExitedWithError } from './utils';
 import { WelcomeViewContexts } from './welcomeViewContext';
 
@@ -34,6 +34,28 @@ export function activate(context: vscode.ExtensionContext) {
    const processManager = new ClusterSmiProcessManager(logger);
    processManager.start();
    disposables.push(parser, processManager);
+
+   const treeView = new ClusterSmiTreeView();
+   disposables.push(
+      treeView,
+      parser.onDidUpdate((output) => {
+         if (output.nodes.length) {
+            WelcomeViewContexts.setOutputIsEmpty(false);
+            treeView.update(output);
+         } else {
+            WelcomeViewContexts.setOutputIsEmpty(true);
+            treeView.update();
+         }
+      }),
+      processManager.onExit(() => {
+         // For both successful and error exits.
+         treeView.update();
+      }),
+      processManager.onError((error) => {
+         // For errors like spawn ENOENT (process start errors).
+         treeView.update();
+      }),
+   );
 
    disposables.push(
       parser.onError((error) => {
@@ -80,7 +102,6 @@ export function activate(context: vscode.ExtensionContext) {
          }
       }),
    );
-   disposables.push(...registerClusterSmiTreeView(parser, processManager));
 
    context.subscriptions.push(...disposables);
 }
