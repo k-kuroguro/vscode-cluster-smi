@@ -60,6 +60,15 @@ export class Config {
       this.workspaceConfig.update(Config.ConfigItem.ProcessInfoFields, fields, vscode.ConfigurationTarget.Global);
       this._onDidChangeConfig.fire([Config.ConfigItem.ProcessInfoFields]);
    }
+
+   get nodeRegex(): string | undefined {
+      return this.workspaceConfig.get(Config.ConfigItem.NodeRegex);
+   }
+
+   set nodeRegex(regex: string | undefined) {
+      this.workspaceConfig.update(Config.ConfigItem.NodeRegex, regex, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.NodeRegex]);
+   }
 }
 
 export namespace Config {
@@ -67,6 +76,7 @@ export namespace Config {
       ExecPath: 'execPath',
       DeviceInfoFields: 'deviceInfoFields',
       ProcessInfoFields: 'processInfoFields',
+      NodeRegex: 'nodeRegex',
    } as const;
    export type ConfigItem = (typeof ConfigItem)[keyof typeof ConfigItem];
    export type ConfigItems = ConfigItem[];

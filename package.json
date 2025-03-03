@@ -121,6 +121,10 @@
                ],
                "uniqueItems": true,
                "description": "List of process information fields to be displayed."
+            },
+            "cluster-smi.nodeRegex": {
+               "type": "string",
+               "description": "Regex to filter the nodes to be displayed. This is directly passed to the -n option of cluster-smi without any escaping."
             }
          }
       },
@@ -143,6 +147,11 @@
             "view": "cluster-smi.treeView",
             "contents": "cluster-smi process has exited with an error.\nCheck the output for details.\n[Show Output](command:cluster-smi.showOutputChannel)\n[Restart Process](command:cluster-smi.startProcess)",
             "when": "cluster-smi.processExitedWithError"
+         },
+         {
+            "view": "cluster-smi.treeView",
+            "contents": "cluster-smi output is empty.",
+            "when": "cluster-smi.outputIsEmpty"
          }
       ]
    },

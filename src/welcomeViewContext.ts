@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
 import { extensionName } from './constants';
 
-export const WelcomeViewContext = {
+const WelcomeViewContext = {
    ProcessExitedSuccessfully: `${extensionName}.processExitedSuccessfully`,
    ProcessExitedWithError: `${extensionName}.processExitedWithError`,
+   OutputIsEmpty: `${extensionName}.outputIsEmpty`,
 } as const;
-export type WelcomeViewContext = (typeof WelcomeViewContext)[keyof typeof WelcomeViewContext];
+type WelcomeViewContext = (typeof WelcomeViewContext)[keyof typeof WelcomeViewContext];
 
-export function setWelcomeViewContext(key: WelcomeViewContext, value: boolean): void {
+function setWelcomeViewContext(key: WelcomeViewContext, value: boolean): void {
    vscode.commands.executeCommand('setContext', key, value);
 }
 
@@ -24,4 +25,8 @@ export function setProcessExitedSuccessfully(): void {
 export function setProcessExitedWithError(): void {
    setWelcomeViewContext(WelcomeViewContext.ProcessExitedSuccessfully, false);
    setWelcomeViewContext(WelcomeViewContext.ProcessExitedWithError, true);
+}
+
+export function setOutputIsEmpty(value: boolean): void {
+   setWelcomeViewContext(WelcomeViewContext.OutputIsEmpty, value);
 }

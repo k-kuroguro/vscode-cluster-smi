@@ -54,7 +54,7 @@ export class ClusterSmiParser {
          .split('\n')
          .map((line) => line.trim());
 
-      let hasTableChanged = false;
+      let hasTableDetected = false;
       for (const line of lines) {
          if (!line) continue;
 
@@ -130,11 +130,15 @@ export class ClusterSmiParser {
                }
             }
 
-            hasTableChanged = true;
+            hasTableDetected = true;
+         }
+
+         if (this.isTableBorder(line)) {
+            hasTableDetected = true;
          }
       }
 
-      if (this.result && hasTableChanged) {
+      if (this.result && hasTableDetected) {
          this._onDidUpdate.fire(this.result);
       }
    }

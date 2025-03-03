@@ -29,7 +29,7 @@ export class ClusterSmiProcessManager {
    constructor(private readonly logger: Logger) {
       this.disposables.push(
          this.config.onDidChangeConfig((items) => {
-            if (items.includes(Config.ConfigItem.ExecPath) && this.shouldBeRunning) {
+            if (items.some((item) => item === Config.ConfigItem.ExecPath || item === Config.ConfigItem.NodeRegex) && this.shouldBeRunning) {
                this.restart();
             }
          }),
@@ -42,8 +42,12 @@ export class ClusterSmiProcessManager {
       }
 
       this.shouldBeRunning = true;
-      this.process = spawn(this.config.execPath, ['-p', '-d'], { detached: true });
-      this.logger.info(`Started process: ${this.config.execPath} -p -d, pid: ${this.process.pid}`);
+      const args = ['-p', '-d'];
+      if (this.config.nodeRegex) {
+         args.push('-n', this.config.nodeRegex);
+      }
+      this.process = spawn(this.config.execPath, args, { detached: true });
+      this.logger.info(`Started process: ${this.config.execPath} ${args.join(' ')}, pid: ${this.process.pid}`);
 
       this.process.stdout.on('data', (data: Buffer) => this._onStdout.fire(data));
       this.process.stderr.on('data', (data: Buffer) => this._onStderr.fire(data));
