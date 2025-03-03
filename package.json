@@ -3,7 +3,7 @@
    "displayName": "cluster-smi",
    "description": "Displays the output of cluster-smi as a tree view.",
    "publisher": "k-kuroguro",
-   "version": "0.0.1",
+   "version": "1.0.0",
    "icon": "resources/icon.png",
    "engines": {
       "vscode": "^1.96.0"
