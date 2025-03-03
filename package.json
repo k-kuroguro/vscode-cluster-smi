@@ -38,6 +38,12 @@
             "command": "cluster-smi.startProcess",
             "title": "Start cluster-smi process",
             "category": "cluster-smi"
+         },
+         {
+            "command": "cluster-smi.treeView.refresh",
+            "title": "Refresh",
+            "category": "cluster-smi",
+            "icon": "$(extensions-refresh)"
          }
       ],
       "menus": {
@@ -49,6 +55,17 @@
             {
                "command": "cluster-smi.startProcess",
                "when": "false"
+            },
+            {
+               "command": "cluster-smi.treeView.refresh",
+               "when": "false"
+            }
+         ],
+         "view/title": [
+            {
+               "command": "cluster-smi.treeView.refresh",
+               "when": "view == cluster-smi.treeView",
+               "group": "navigation"
             }
          ]
       },

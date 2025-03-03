@@ -7,10 +7,14 @@ import { ClusterSmiTreeDataProvider } from './treeDataProvider';
 
 export function registerClusterSmiTreeView(parser: ClusterSmiParser, processManager: ClusterSmiProcessManager): vscode.Disposable[] {
    const treeDataProvider = new ClusterSmiTreeDataProvider();
+   const treeView = vscode.window.createTreeView(`${extensionName}.treeView`, { treeDataProvider, showCollapseAll: true });
    return [
       treeDataProvider,
-      vscode.window.registerTreeDataProvider(`${extensionName}.treeView`, treeDataProvider),
+      treeView,
       vscode.window.registerFileDecorationProvider(new DeviceHighlightProvider()),
+      vscode.commands.registerCommand(`${extensionName}.treeView.refresh`, () => {
+         treeDataProvider.refresh();
+      }),
       parser.onDidUpdate((output) => {
          treeDataProvider.update(output);
       }),
