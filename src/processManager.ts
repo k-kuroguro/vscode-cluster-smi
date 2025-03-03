@@ -1,12 +1,10 @@
 import { type ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
 import * as vscode from 'vscode';
 import { Config } from './config';
+import type { Logger } from './logger';
+import type { ExitStatus } from './types';
+import { isProcessExitedWithError } from './utils';
 import { setProcessExitedSuccessfully, setProcessExitedWithError, setProcessIsRunning } from './welcomeViewContext';
-
-export interface ExitStatus {
-   code?: number;
-   signal?: NodeJS.Signals;
-}
 
 export class ProcessAlreadyRunningError extends Error {
    name = 'ProcessAlreadyRunningError';
@@ -28,7 +26,7 @@ export class ClusterSmiProcessManager {
    private shouldBeRunning = false;
    private disposables: vscode.Disposable[] = [this._onStdout, this._onStderr, this._onError, this._onExit];
 
-   constructor() {
+   constructor(private readonly logger: Logger) {
       this.disposables.push(
          this.config.onDidChangeConfig((items) => {
             if (items.includes(Config.ConfigItem.ExecPath) && this.shouldBeRunning) {
@@ -45,6 +43,8 @@ export class ClusterSmiProcessManager {
 
       this.shouldBeRunning = true;
       this.process = spawn(this.config.execPath, ['-p', '-d'], { detached: true });
+      this.logger.info(`Started process: ${this.config.execPath} -p -d, pid: ${this.process.pid}`);
+
       this.process.stdout.on('data', (data: Buffer) => this._onStdout.fire(data));
       this.process.stderr.on('data', (data: Buffer) => this._onStderr.fire(data));
       this.process.on('error', (error: Error) => {
@@ -55,10 +55,10 @@ export class ClusterSmiProcessManager {
 
       this.process.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
          this.process = undefined;
-         this._onExit.fire({ code: code ?? undefined, signal: signal ?? undefined });
+         const status: ExitStatus = { code: code ?? undefined, signal: signal ?? undefined };
+         this._onExit.fire(status);
 
-         const isError = code !== 0 || signal !== null;
-         if (isError) {
+         if (isProcessExitedWithError(status)) {
             setProcessExitedWithError();
          } else {
             setProcessExitedSuccessfully();

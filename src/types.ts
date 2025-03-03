@@ -71,3 +71,8 @@ export type ProcessInfo =
    | { field: typeof ProcessInfoField.UsedGpuMemory; value: number }
    | { field: typeof ProcessInfoField.Username; value: string }
    | { field: typeof ProcessInfoField.Runtime; value: Runtime };
+
+export interface ExitStatus {
+   code?: number;
+   signal?: NodeJS.Signals;
+}

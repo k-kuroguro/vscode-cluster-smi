@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import { Config } from './config';
 import { extensionName } from './constants';
-import { type Logger, OutputChannelLogger } from './logger';
+import { LogLevel, type Logger, OutputChannelLogger } from './logger';
 import { ClusterSmiParser, type ParseError } from './parser';
 import { ClusterSmiProcessManager, ProcessAlreadyRunningError } from './processManager';
 import { registerClusterSmiTreeView } from './treeView';
+import { isProcessExitedWithError } from './utils';
 
 function handleCmdError(logger: Logger, error: Error | Buffer) {
    const prefix = 'An error occurred while executing the command:';
@@ -29,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
    disposables.push(config);
 
    const parser = new ClusterSmiParser();
-   const processManager = new ClusterSmiProcessManager();
+   const processManager = new ClusterSmiProcessManager(logger);
    processManager.start();
    disposables.push(parser, processManager);
 
@@ -45,6 +46,9 @@ export function activate(context: vscode.ExtensionContext) {
       }),
       processManager.onError((error) => {
          handleCmdError(logger, error);
+      }),
+      processManager.onExit((status) => {
+         logger.log(isProcessExitedWithError(status) ? LogLevel.Error : LogLevel.Info, `Process exited with code: ${status.code ?? 'null'}, signal: ${status.signal ?? 'null'}`);
       }),
    );
 
