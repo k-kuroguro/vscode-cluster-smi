@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { extensionName } from '../constants';
 import type { ClusterSmiParser } from '../parser';
 import type { ClusterSmiProcessManager } from '../processManager';
-import { setOutputIsEmpty } from '../welcomeViewContext';
+import { WelcomeViewContexts } from '../welcomeViewContext';
 import { DeviceHighlightProvider } from './deviceHighlight';
 import { ClusterSmiTreeDataProvider } from './treeDataProvider';
 
@@ -20,7 +20,7 @@ export function registerClusterSmiTreeView(parser: ClusterSmiParser, processMana
          if (output.nodes.length) {
             treeDataProvider.update(output);
          } else {
-            setOutputIsEmpty(true);
+            WelcomeViewContexts.setOutputIsEmpty(true);
             treeDataProvider.update();
          }
       }),

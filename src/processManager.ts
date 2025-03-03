@@ -4,7 +4,7 @@ import { Config } from './config';
 import type { Logger } from './logger';
 import type { ExitStatus } from './types';
 import { isProcessExitedWithError } from './utils';
-import { setProcessExitedSuccessfully, setProcessExitedWithError, setProcessIsRunning } from './welcomeViewContext';
+import { WelcomeViewContexts } from './welcomeViewContext';
 
 export class ProcessAlreadyRunningError extends Error {
    name = 'ProcessAlreadyRunningError';
@@ -54,7 +54,7 @@ export class ClusterSmiProcessManager {
       this.process.on('error', (error: Error) => {
          this.process = undefined;
          this._onError.fire(error);
-         setProcessExitedWithError();
+         WelcomeViewContexts.setProcessExitedWithError();
       });
 
       this.process.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
@@ -63,13 +63,13 @@ export class ClusterSmiProcessManager {
          this._onExit.fire(status);
 
          if (isProcessExitedWithError(status)) {
-            setProcessExitedWithError();
+            WelcomeViewContexts.setProcessExitedWithError();
          } else {
-            setProcessExitedSuccessfully();
+            WelcomeViewContexts.setProcessExitedSuccessfully();
          }
       });
 
-      setProcessIsRunning();
+      WelcomeViewContexts.setProcessIsRunning();
    }
 
    async stop(): Promise<void> {
