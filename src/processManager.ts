@@ -44,10 +44,11 @@ export class ClusterSmiProcessManager {
       }
 
       this.shouldBeRunning = true;
-      this.process = spawn(this.config.execPath, ['-p', '-d']);
+      this.process = spawn(this.config.execPath, ['-p', '-d'], { detached: true });
       this.process.stdout.on('data', (data: Buffer) => this._onStdout.fire(data));
       this.process.stderr.on('data', (data: Buffer) => this._onStderr.fire(data));
       this.process.on('error', (error: Error) => {
+         this.process = undefined;
          this._onError.fire(error);
          setProcessExitedWithError();
       });
@@ -63,22 +64,24 @@ export class ClusterSmiProcessManager {
             setProcessExitedSuccessfully();
          }
       });
-      this.process.on('close', () => (this.process = undefined));
 
       setProcessIsRunning();
    }
 
-   stop(): void {
-      if (this.process) {
-         this.shouldBeRunning = false;
-         this.process.kill();
-         this.process.removeAllListeners();
-         this.process = undefined;
-      }
+   async stop(): Promise<void> {
+      this.shouldBeRunning = false;
+      await new Promise((resolve) => {
+         if (this.process?.pid) {
+            process.kill(-this.process.pid);
+            this.process.once('exit', () => resolve(undefined));
+         } else {
+            resolve(undefined);
+         }
+      });
    }
 
-   restart(): void {
-      this.stop();
+   async restart(): Promise<void> {
+      await this.stop();
       this.start();
    }
 
