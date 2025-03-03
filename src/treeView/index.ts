@@ -18,6 +18,7 @@ export function registerClusterSmiTreeView(parser: ClusterSmiParser, processMana
       }),
       parser.onDidUpdate((output) => {
          if (output.nodes.length) {
+            WelcomeViewContexts.setOutputIsEmpty(false);
             treeDataProvider.update(output);
          } else {
             WelcomeViewContexts.setOutputIsEmpty(true);

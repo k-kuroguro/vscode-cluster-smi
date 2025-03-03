@@ -3,8 +3,6 @@ import * as vscode from 'vscode';
 import { Config } from './config';
 import type { Logger } from './logger';
 import type { ExitStatus } from './types';
-import { isProcessExitedWithError } from './utils';
-import { WelcomeViewContexts } from './welcomeViewContext';
 
 export class ProcessAlreadyRunningError extends Error {
    name = 'ProcessAlreadyRunningError';
@@ -16,10 +14,12 @@ export class ClusterSmiProcessManager {
    private _onStderr: vscode.EventEmitter<Buffer> = new vscode.EventEmitter<Buffer>();
    private _onError: vscode.EventEmitter<Error> = new vscode.EventEmitter<Error>();
    private _onExit: vscode.EventEmitter<ExitStatus> = new vscode.EventEmitter<ExitStatus>();
+   private _onStart: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
    readonly onStdout: vscode.Event<Buffer> = this._onStdout.event;
    readonly onStderr: vscode.Event<Buffer> = this._onStderr.event;
    readonly onError: vscode.Event<Error> = this._onError.event; // Fired for errors before starting the process (e.g. spawn ENOENT) or if the process exits with an error.
    readonly onExit: vscode.Event<ExitStatus> = this._onExit.event; // Fired when the process ends, covering both successful and error exits.
+   readonly onStart: vscode.Event<void> = this._onStart.event;
 
    private config = Config.getInstance();
    private process?: ChildProcessWithoutNullStreams;
@@ -54,22 +54,15 @@ export class ClusterSmiProcessManager {
       this.process.on('error', (error: Error) => {
          this.process = undefined;
          this._onError.fire(error);
-         WelcomeViewContexts.setProcessExitedWithError();
       });
 
       this.process.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
          this.process = undefined;
          const status: ExitStatus = { code: code ?? undefined, signal: signal ?? undefined };
          this._onExit.fire(status);
-
-         if (isProcessExitedWithError(status)) {
-            WelcomeViewContexts.setProcessExitedWithError();
-         } else {
-            WelcomeViewContexts.setProcessExitedSuccessfully();
-         }
       });
 
-      WelcomeViewContexts.setProcessIsRunning();
+      this._onStart.fire();
    }
 
    async stop(): Promise<void> {
