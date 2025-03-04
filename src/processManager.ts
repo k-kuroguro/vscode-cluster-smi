@@ -24,7 +24,7 @@ export class ClusterSmiProcessManager {
    private config = Config.getInstance();
    private process?: ChildProcessWithoutNullStreams;
    private shouldBeRunning = false;
-   private disposables: vscode.Disposable[] = [this._onStdout, this._onStderr, this._onError, this._onExit];
+   private disposables: vscode.Disposable[] = [this._onStdout, this._onStderr, this._onError, this._onExit, this._onStart];
 
    constructor(private readonly logger: Logger) {
       this.disposables.push(
