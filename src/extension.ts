@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
             treeView.update();
          }
       }),
-      processManager.onExit(() => {
+      processManager.onDidExit(() => {
          // For both successful and error exits.
          treeView.update();
       }),
@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
          handleCmdError(logger, error);
          WelcomeViewContexts.setProcessExitedWithError();
       }),
-      processManager.onExit((status) => {
+      processManager.onDidExit((status) => {
          logger.log(isProcessExitedWithError(status) ? LogLevel.Error : LogLevel.Info, `Process exited with code: ${status.code ?? 'null'}, signal: ${status.signal ?? 'null'}`);
 
          if (isProcessExitedWithError(status)) {
@@ -81,7 +81,7 @@ export function activate(context: vscode.ExtensionContext) {
          }
          WelcomeViewContexts.setOutputIsEmpty(false);
       }),
-      processManager.onStart(() => {
+      processManager.onDidStart(() => {
          WelcomeViewContexts.setProcessIsRunning();
       }),
    );

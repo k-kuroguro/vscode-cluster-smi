@@ -36,7 +36,7 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
 
    constructor() {
       this.disposables.push(
-         this.config.onDidChangeConfig((items) => {
+         this.config.onDidChange((items) => {
             if (items.some((item) => item === Config.ConfigItem.DeviceInfoFields || item === Config.ConfigItem.ProcessInfoFields)) {
                this.refresh();
             }

@@ -3,19 +3,19 @@ import { extensionName } from './constants';
 import { DeviceInfoField, ProcessInfoField } from './types';
 
 export class Config {
-   private _onDidChangeConfig: vscode.EventEmitter<Config.ConfigItems> = new vscode.EventEmitter<Config.ConfigItems>();
-   readonly onDidChangeConfig: vscode.Event<Config.ConfigItems> = this._onDidChangeConfig.event;
+   private _onDidChange: vscode.EventEmitter<Config.ConfigItems> = new vscode.EventEmitter<Config.ConfigItems>();
+   readonly onDidChange: vscode.Event<Config.ConfigItems> = this._onDidChange.event;
 
    private static instance: Config = new Config();
    private workspaceConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(extensionName);
-   private disposables: vscode.Disposable[] = [this._onDidChangeConfig];
+   private disposables: vscode.Disposable[] = [this._onDidChange];
 
    private constructor() {
       this.disposables.push(
          vscode.workspace.onDidChangeConfiguration((e) => {
             this.loadWorkspaceConfig();
             const changedItems = Object.values(Config.ConfigItem).filter((item) => e.affectsConfiguration(`${extensionName}.${item}`));
-            if (changedItems.length) this._onDidChangeConfig.fire(changedItems);
+            if (changedItems.length) this._onDidChange.fire(changedItems);
          }),
       );
    }
@@ -40,7 +40,7 @@ export class Config {
 
    set execPath(path: string) {
       this.workspaceConfig.update(Config.ConfigItem.ExecPath, path, vscode.ConfigurationTarget.Global);
-      this._onDidChangeConfig.fire([Config.ConfigItem.ExecPath]);
+      this._onDidChange.fire([Config.ConfigItem.ExecPath]);
    }
 
    get deviceInfoFields(): DeviceInfoField[] {
@@ -49,7 +49,7 @@ export class Config {
 
    set deviceInfoFields(fields: DeviceInfoField[]) {
       this.workspaceConfig.update(Config.ConfigItem.DeviceInfoFields, fields, vscode.ConfigurationTarget.Global);
-      this._onDidChangeConfig.fire([Config.ConfigItem.DeviceInfoFields]);
+      this._onDidChange.fire([Config.ConfigItem.DeviceInfoFields]);
    }
 
    get processInfoFields(): ProcessInfoField[] {
@@ -58,7 +58,7 @@ export class Config {
 
    set processInfoFields(fields: ProcessInfoField[]) {
       this.workspaceConfig.update(Config.ConfigItem.ProcessInfoFields, fields, vscode.ConfigurationTarget.Global);
-      this._onDidChangeConfig.fire([Config.ConfigItem.ProcessInfoFields]);
+      this._onDidChange.fire([Config.ConfigItem.ProcessInfoFields]);
    }
 
    get nodeRegex(): string | undefined {
@@ -67,7 +67,7 @@ export class Config {
 
    set nodeRegex(regex: string | undefined) {
       this.workspaceConfig.update(Config.ConfigItem.NodeRegex, regex, vscode.ConfigurationTarget.Global);
-      this._onDidChangeConfig.fire([Config.ConfigItem.NodeRegex]);
+      this._onDidChange.fire([Config.ConfigItem.NodeRegex]);
    }
 }
 
