@@ -35,7 +35,7 @@ export class Config {
    }
 
    get execPath(): string {
-      return this.workspaceConfig.get(Config.ConfigItem.ExecPath) ?? 'cluster-smi';
+      return this.workspaceConfig.get(Config.ConfigItem.ExecPath) || 'cluster-smi';
    }
 
    set execPath(path: string) {
