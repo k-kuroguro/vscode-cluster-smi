@@ -2,9 +2,19 @@ import * as vscode from 'vscode';
 import { DeviceInfoField, ProcessInfoField } from '../types';
 import type { Device, DeviceInfo, Node, Process, ProcessInfo } from '../types';
 import { availableDeviceColor, createDeviceUri } from './deviceHighlight';
+import type { NodeFilter } from './types';
 import { isAvailableDevice, padNumber } from './utils';
 
-export type TreeItem = TimestampItem | NodeItem | DeviceItem | DeviceInfoItem | ProcessItem | ProcessInfoItem;
+export type TreeItem = NodeFilterItem | TimestampItem | NodeItem | DeviceItem | DeviceInfoItem | ProcessItem | ProcessInfoItem;
+
+export class NodeFilterItem extends vscode.TreeItem {
+   constructor(filter: NodeFilter) {
+      super(filter.regex, vscode.TreeItemCollapsibleState.None);
+      this.contextValue = 'nodeFilter';
+      this.iconPath = new vscode.ThemeIcon('filter');
+      this.tooltip = `Node regex: ${filter.regex}`;
+   }
+}
 
 export class TimestampItem extends vscode.TreeItem {
    constructor(timestamp: Date) {

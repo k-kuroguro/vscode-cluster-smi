@@ -3,7 +3,7 @@ import { Config } from '../config';
 import type { ClusterSmiOutput } from '../types';
 import { DeviceInfoField, ProcessInfoField } from '../types';
 import type { CollapsibleStateStore } from './collapsibleStateStore';
-import { DeviceInfoItem, DeviceItem, NodeItem, ProcessInfoItem, ProcessItem, TimestampItem, type TreeItem } from './treeItem';
+import { DeviceInfoItem, DeviceItem, NodeFilterItem, NodeItem, ProcessInfoItem, ProcessItem, TimestampItem, type TreeItem } from './treeItem';
 import type { Element } from './types';
 import { isDevice, isDeviceinfo, isNode, isProcess, isProcessInfo } from './utils';
 
@@ -59,7 +59,11 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
          return new ProcessInfoItem(element);
       }
 
-      return new TimestampItem(element);
+      if (element instanceof Date) {
+         return new TimestampItem(element);
+      }
+
+      return new NodeFilterItem(element);
    }
 
    getChildren(element?: Element): Element[] {
@@ -68,7 +72,12 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
       }
 
       if (!element) {
-         return [this.output.timestamp, ...this.output.nodes];
+         const elements: Element[] = [];
+         if (this.config.nodeRegex) {
+            elements.push({ regex: this.config.nodeRegex });
+         }
+         elements.push(this.output.timestamp, ...this.output.nodes);
+         return elements;
       }
 
       if (isNode(element)) {
