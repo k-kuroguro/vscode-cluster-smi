@@ -172,7 +172,7 @@
          },
          {
             "view": "cluster-smi.treeView",
-            "contents": "cluster-smi output is empty.",
+            "contents": "cluster-smi output is empty.\nThis might be due to the filter configuration (nodeRegex).\n[Set Node Regex](command:cluster-smi.setNodeRegex)",
             "when": "cluster-smi.outputIsEmpty"
          }
       ]
