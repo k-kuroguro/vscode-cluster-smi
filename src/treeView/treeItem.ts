@@ -10,6 +10,7 @@ export class TimestampItem extends vscode.TreeItem {
    constructor(timestamp: Date) {
       super(TimestampItem.getLabel(timestamp), vscode.TreeItemCollapsibleState.None);
       this.contextValue = 'timestamp';
+      this.iconPath = new vscode.ThemeIcon('clock');
       this.tooltip = `Last updated: ${this.label}`;
    }
 
@@ -26,6 +27,7 @@ export class NodeItem extends vscode.TreeItem {
       super(node.hostname, collapsibleState ?? vscode.TreeItemCollapsibleState.Collapsed);
       this.contextValue = 'node';
       this.iconPath = new vscode.ThemeIcon('server-environment');
+      this.tooltip = node.hostname;
    }
 }
 
@@ -45,6 +47,7 @@ export class DeviceInfoItem extends vscode.TreeItem {
       super(DeviceInfoItem.getLabel(deviceInfo), collapsibleState ?? DeviceInfoItem.getCollapsibleState(deviceInfo));
       this.contextValue = 'gpuInfo';
       this.description = DeviceInfoItem.getDescription(deviceInfo);
+      this.tooltip = `${DeviceInfoItem.getLabel(deviceInfo)}: ${DeviceInfoItem.getDescription(deviceInfo)}`;
    }
 
    private static getLabel(deviceInfo: DeviceInfo): string {
@@ -79,7 +82,7 @@ export class DeviceInfoItem extends vscode.TreeItem {
          case DeviceInfoField.PowerUsage:
             return `${padNumber(value, 3)} W`;
          case DeviceInfoField.Processes:
-            return `Running: ${value.length}`;
+            return `${value.length} running`;
       }
    }
 
@@ -93,6 +96,7 @@ export class ProcessItem extends vscode.TreeItem {
       super(process.name, collapsibleState ?? vscode.TreeItemCollapsibleState.Collapsed);
       this.contextValue = 'process';
       this.description = process.username;
+      this.tooltip = process.name;
    }
 }
 
@@ -101,6 +105,7 @@ export class ProcessInfoItem extends vscode.TreeItem {
       super(ProcessInfoItem.getLabel(processInfo), vscode.TreeItemCollapsibleState.None);
       this.contextValue = 'processInfo';
       this.description = ProcessInfoItem.getDescription(processInfo);
+      this.tooltip = `${ProcessInfoItem.getLabel(processInfo)}: ${ProcessInfoItem.getDescription(processInfo)}`;
    }
 
    private static getLabel(processInfo: ProcessInfo): string {
