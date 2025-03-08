@@ -130,7 +130,7 @@
             "cluster-smi.nodeRegex": {
                "type": "string",
                "minLength": 1,
-               "description": "Regex to filter the nodes to be displayed. This is directly passed to the -n option of cluster-smi without any escaping."
+               "description": "Regex for filtering the nodes to be displayed. This is directly passed to the -n option of cluster-smi without any escaping."
             }
          }
       },
