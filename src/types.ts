@@ -50,13 +50,14 @@ export const DeviceInfoField = {
 } as const;
 export type DeviceInfoField = (typeof DeviceInfoField)[keyof typeof DeviceInfoField];
 
+export type DeviceInfoProcesses = { field: typeof DeviceInfoField.Processes; value: Process[] };
 export type DeviceInfo =
    | { field: typeof DeviceInfoField.Utilization; value: number }
    | { field: typeof DeviceInfoField.Memory; value: Memory }
    | { field: typeof DeviceInfoField.FanSpeed; value: number }
    | { field: typeof DeviceInfoField.Temperature; value: number }
    | { field: typeof DeviceInfoField.PowerUsage; value: number }
-   | { field: typeof DeviceInfoField.Processes; value: Process[] };
+   | DeviceInfoProcesses;
 
 export const ProcessInfoField = {
    Pid: 'pid',
@@ -76,3 +77,13 @@ export interface ExitStatus {
    code?: number;
    signal?: NodeJS.Signals;
 }
+
+export type WithParent<T> = T extends Device
+   ? T & { parent: Node }
+   : T extends DeviceInfo
+     ? T & { parent: WithParent<Device> }
+     : T extends Process
+       ? T & { parent: WithParent<DeviceInfoProcesses> }
+       : T extends ProcessInfo
+         ? T & { parent: WithParent<Process> }
+         : never;

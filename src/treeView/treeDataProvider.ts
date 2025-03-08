@@ -1,30 +1,11 @@
 import * as vscode from 'vscode';
 import { Config } from '../config';
-import type { ClusterSmiOutput, Device, DeviceInfo, Node, Process, ProcessInfo } from '../types';
+import type { ClusterSmiOutput } from '../types';
 import { DeviceInfoField, ProcessInfoField } from '../types';
+import type { CollapsibleStateStore } from './collapsibleStateStore';
 import { DeviceInfoItem, DeviceItem, NodeItem, ProcessInfoItem, ProcessItem, TimestampItem, type TreeItem } from './treeItem';
-
-export type Element = Date | Node | Device | DeviceInfo | Process | ProcessInfo;
-
-function isNode(element: Element): element is Node {
-   return 'devices' in element;
-}
-
-function isDevice(element: Element): element is Device {
-   return 'processes' in element;
-}
-
-function isDeviceinfo(element: Element): element is DeviceInfo {
-   return 'field' in element && (Object.values(DeviceInfoField) as string[]).includes(element.field);
-}
-
-function isProcess(element: Element): element is Process {
-   return 'pid' in element;
-}
-
-function isProcessInfo(element: Element): element is ProcessInfo {
-   return 'field' in element && (Object.values(ProcessInfoField) as string[]).includes(element.field);
-}
+import type { Element } from './types';
+import { isDevice, isDeviceinfo, isNode, isProcess, isProcessInfo } from './utils';
 
 export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Element> {
    private _onDidChangeTreeData: vscode.EventEmitter<Element | Element[] | undefined> = new vscode.EventEmitter<Element | Element[] | undefined>();
@@ -34,13 +15,22 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
    private disposables: vscode.Disposable[] = [this._onDidChangeTreeData];
    private config = Config.getInstance();
 
-   constructor() {
+   constructor(private collapsibleStateStore: CollapsibleStateStore) {
       this.disposables.push(
          this.config.onDidChange((items) => {
             if (items.some((item) => item === Config.ConfigItem.DeviceInfoFields || item === Config.ConfigItem.ProcessInfoFields)) {
                this.refresh();
             }
          }),
+         (() => {
+            const d = this.onDidChangeTreeData(() => {
+               if (this.output) {
+                  this.collapsibleStateStore.removeUnusedKeys(this.output);
+                  d.dispose();
+               }
+            });
+            return d;
+         })(), // Run only once after the first update
       );
    }
 
@@ -50,19 +40,19 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
 
    getTreeItem(element: Element): TreeItem {
       if (isNode(element)) {
-         return new NodeItem(element);
+         return new NodeItem(element, this.collapsibleStateStore.get(element));
       }
 
       if (isDevice(element)) {
-         return new DeviceItem(element);
+         return new DeviceItem(element, this.collapsibleStateStore.get(element));
       }
 
       if (isDeviceinfo(element)) {
-         return new DeviceInfoItem(element);
+         return new DeviceInfoItem(element, this.collapsibleStateStore.get(element));
       }
 
       if (isProcess(element)) {
-         return new ProcessItem(element);
+         return new ProcessItem(element, this.collapsibleStateStore.get(element));
       }
 
       if (isProcessInfo(element)) {
@@ -82,43 +72,43 @@ export class ClusterSmiTreeDataProvider implements vscode.TreeDataProvider<Eleme
       }
 
       if (isNode(element)) {
-         return element.devices;
+         return element.devices.map((device) => ({ ...device, parent: element }));
       }
 
       if (isDevice(element)) {
          return this.config.deviceInfoFields.map((field) => {
             switch (field) {
                case DeviceInfoField.Utilization:
-                  return { field, value: element.utilization };
+                  return { field, value: element.utilization, parent: element };
                case DeviceInfoField.Memory:
-                  return { field, value: element.memory };
+                  return { field, value: element.memory, parent: element };
                case DeviceInfoField.FanSpeed:
-                  return { field, value: element.fanSpeed };
+                  return { field, value: element.fanSpeed, parent: element };
                case DeviceInfoField.Temperature:
-                  return { field, value: element.temperature };
+                  return { field, value: element.temperature, parent: element };
                case DeviceInfoField.PowerUsage:
-                  return { field, value: element.powerUsage };
+                  return { field, value: element.powerUsage, parent: element };
                case DeviceInfoField.Processes:
-                  return { field, value: element.processes };
+                  return { field, value: element.processes, parent: element };
             }
          });
       }
 
       if (isDeviceinfo(element) && element.field === DeviceInfoField.Processes) {
-         return element.value;
+         return element.value.map((process) => ({ ...process, parent: element }));
       }
 
       if (isProcess(element)) {
          return this.config.processInfoFields.map((field) => {
             switch (field) {
                case ProcessInfoField.Pid:
-                  return { field, value: element.pid };
+                  return { field, value: element.pid, parent: element };
                case ProcessInfoField.UsedGpuMemory:
-                  return { field, value: element.usedGpuMemory };
+                  return { field, value: element.usedGpuMemory, parent: element };
                case ProcessInfoField.Username:
-                  return { field, value: element.username };
+                  return { field, value: element.username, parent: element };
                case ProcessInfoField.Runtime:
-                  return { field, value: element.runtime };
+                  return { field, value: element.runtime, parent: element };
             }
          });
       }

@@ -22,16 +22,16 @@ export class TimestampItem extends vscode.TreeItem {
 }
 
 export class NodeItem extends vscode.TreeItem {
-   constructor(node: Node) {
-      super(node.hostname, vscode.TreeItemCollapsibleState.Collapsed);
+   constructor(node: Node, collapsibleState?: vscode.TreeItemCollapsibleState) {
+      super(node.hostname, collapsibleState ?? vscode.TreeItemCollapsibleState.Collapsed);
       this.contextValue = 'node';
       this.iconPath = new vscode.ThemeIcon('server-environment');
    }
 }
 
 export class DeviceItem extends vscode.TreeItem {
-   constructor(device: Device) {
-      super(device.id.toString(), vscode.TreeItemCollapsibleState.Collapsed);
+   constructor(device: Device, collapsibleState?: vscode.TreeItemCollapsibleState) {
+      super(device.id.toString(), collapsibleState ?? vscode.TreeItemCollapsibleState.Collapsed);
       this.contextValue = 'device';
       this.description = device.name;
       this.iconPath = new vscode.ThemeIcon('chip', isAvailableDevice(device) ? availableDeviceColor : undefined);
@@ -41,8 +41,8 @@ export class DeviceItem extends vscode.TreeItem {
 }
 
 export class DeviceInfoItem extends vscode.TreeItem {
-   constructor(deviceInfo: DeviceInfo) {
-      super(DeviceInfoItem.getLabel(deviceInfo), DeviceInfoItem.getCollapsibleState(deviceInfo));
+   constructor(deviceInfo: DeviceInfo, collapsibleState?: vscode.TreeItemCollapsibleState) {
+      super(DeviceInfoItem.getLabel(deviceInfo), collapsibleState ?? DeviceInfoItem.getCollapsibleState(deviceInfo));
       this.contextValue = 'gpuInfo';
       this.description = DeviceInfoItem.getDescription(deviceInfo);
    }
@@ -89,8 +89,8 @@ export class DeviceInfoItem extends vscode.TreeItem {
 }
 
 export class ProcessItem extends vscode.TreeItem {
-   constructor(process: Process) {
-      super(process.name, vscode.TreeItemCollapsibleState.Collapsed);
+   constructor(process: Process, collapsibleState?: vscode.TreeItemCollapsibleState) {
+      super(process.name, collapsibleState ?? vscode.TreeItemCollapsibleState.Collapsed);
       this.contextValue = 'process';
       this.description = process.username;
    }

@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
    processManager.start();
    disposables.push(parser, processManager);
 
-   const treeView = new ClusterSmiTreeView();
+   const treeView = new ClusterSmiTreeView(context);
    disposables.push(
       treeView,
       parser.onDidUpdate((output) => {
@@ -100,6 +100,9 @@ export function activate(context: vscode.ExtensionContext) {
                throw error;
             }
          }
+      }),
+      vscode.commands.registerCommand(`${extensionName}.clearCache`, () => {
+         treeView.clearCache();
       }),
    );
 

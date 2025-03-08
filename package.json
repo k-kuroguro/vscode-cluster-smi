@@ -44,6 +44,11 @@
             "title": "Refresh",
             "category": "cluster-smi",
             "icon": "$(extensions-refresh)"
+         },
+         {
+            "command": "cluster-smi.clearCache",
+            "title": "Clear Cache",
+            "category": "cluster-smi"
          }
       ],
       "menus": {
