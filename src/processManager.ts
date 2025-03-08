@@ -46,7 +46,7 @@ export class ClusterSmiProcessManager {
       if (this.config.nodeRegex) {
          args.push('-n', this.config.nodeRegex);
       }
-      this.process = spawn(this.config.execPath, args, { detached: true });
+      this.process = spawn(this.config.execPath, args);
       this.logger.info(`Started process: ${this.config.execPath} ${args.join(' ')}, pid: ${this.process.pid}`);
 
       this.process.stdout.on('data', (data: Buffer) => this._onStdout.fire(data));
@@ -69,8 +69,8 @@ export class ClusterSmiProcessManager {
       this.shouldBeRunning = false;
       await new Promise((resolve) => {
          if (this.process?.pid) {
-            process.kill(-this.process.pid);
             this.process.once('exit', () => resolve(undefined));
+            process.kill(this.process.pid);
          } else {
             resolve(undefined);
          }
