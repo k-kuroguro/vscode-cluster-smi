@@ -62,7 +62,7 @@ export class Config {
    }
 
    get nodeRegex(): string | undefined {
-      return this.workspaceConfig.get(Config.ConfigItem.NodeRegex);
+      return this.workspaceConfig.get(Config.ConfigItem.NodeRegex) || undefined;
    }
 
    set nodeRegex(regex: string | undefined) {
