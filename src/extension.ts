@@ -104,6 +104,15 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand(`${extensionName}.clearCache`, () => {
          treeView.clearCache();
       }),
+      vscode.commands.registerCommand(`${extensionName}.setNodeRegex`, async () => {
+         const result = await vscode.window.showInputBox({
+            prompt: 'Enter a regex for filtering nodes',
+            value: config.nodeRegex,
+         });
+         if (result !== undefined) {
+            config.nodeRegex = result || undefined;
+         }
+      }),
    );
 
    context.subscriptions.push(...disposables);

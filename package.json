@@ -49,6 +49,12 @@
             "command": "cluster-smi.clearCache",
             "title": "Clear Cache",
             "category": "cluster-smi"
+         },
+         {
+            "command": "cluster-smi.setNodeRegex",
+            "title": "Set Regex for Filtering Nodes",
+            "category": "cluster-smi",
+            "icon": "$(filter)"
          }
       ],
       "menus": {
@@ -70,7 +76,12 @@
             {
                "command": "cluster-smi.treeView.refresh",
                "when": "view == cluster-smi.treeView",
-               "group": "navigation"
+               "group": "navigation@0"
+            },
+            {
+               "command": "cluster-smi.setNodeRegex",
+               "when": "view == cluster-smi.treeView",
+               "group": "navigation@1"
             }
          ]
       },
