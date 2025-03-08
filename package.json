@@ -31,12 +31,12 @@
       "commands": [
          {
             "command": "cluster-smi.showOutputChannel",
-            "title": "Show cluster-smi output channel",
+            "title": "Show cluster-smi Output Channel",
             "category": "cluster-smi"
          },
          {
             "command": "cluster-smi.startProcess",
-            "title": "Start cluster-smi process",
+            "title": "Start cluster-smi Process",
             "category": "cluster-smi"
          },
          {
